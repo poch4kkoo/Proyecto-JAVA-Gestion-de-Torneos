@@ -14,11 +14,17 @@ public class Enfrentamiento {
         puntaje1 = 0;
         puntaje2 = 0;
         jugado = false;
-        this.ronda = ronda;
+        this.ronda = 1;
 
     }
 
     public Enfrentamiento(Participante participante1, Participante participante2, int ronda) {
+        this.participante1 = participante1;
+        this.participante2 = participante2;
+        puntaje1 = 0;
+        puntaje2 = 0;
+        jugado = false;
+        this.ronda = ronda;
     }
 
     public void registrarResultado(float puntaje1, float puntaje2) {
