@@ -30,6 +30,8 @@ public class Enfrentamiento {
         this.puntaje1 = puntaje1;
         this.puntaje2 = puntaje2;
         this.jugado = true;
+
+        GestorTorneo.getInstancia().notificar();
     }
 
     public Participante getGanador() {

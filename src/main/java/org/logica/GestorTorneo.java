@@ -13,6 +13,7 @@ public class GestorTorneo {
     private FormatoTorneo formato;
     private List<Participante> Inscritos;
     private List<Enfrentamiento> enfrentamientos;
+    private List<Observer> observadores;
     private int rondaActual;
 
     // El constructor es privado para seguir el patron singleton.
@@ -20,6 +21,7 @@ public class GestorTorneo {
 
         this.Inscritos = new ArrayList<>();
         this.enfrentamientos = new ArrayList<>();
+        this.observadores = new ArrayList<>();
     }
 
     // El punto de acceso para obtener la instancia unica
@@ -30,18 +32,34 @@ public class GestorTorneo {
         return instanciaUnica;
     }
 
+    public void registrarObserver(Observer o) {
+        observadores.add(o);
+    }
+
+    public void eliminarObserver(Observer o) {
+        observadores.remove(o);
+    }
+
+    public void notificar() {
+        for (Observer o : observadores) {
+            o.actualizar();
+        }
+    }
+
     // Configuracion del torneo
 
     public void configurarTorneo(String nombre, Disciplina disciplina, FormatoTorneo formato) {
         this.nombre = nombre;
         this.disciplina = disciplina;
         this.formato = formato;
+        notificar();
     }
 
     // Metodo para inscribir personas
 
     public void inscribirParticipante(Participante participante) {
         this.Inscritos.add(participante);
+        notificar();
     }
 
     public void generarTorneo() {
@@ -104,6 +122,8 @@ public class GestorTorneo {
                 enfrentamientos.add(new Enfrentamiento(Inscritos.get(i), Inscritos.get(i + 1)));
             }
         }
+
+        notificar();
     }
 
 
@@ -142,6 +162,7 @@ public class GestorTorneo {
         // Comprueba si alguien gano el torneo
         if (clasificados.size() == 1) {
             System.out.println("Ganador del Torneo: " + clasificados.get(0).getNombre());
+            notificar();
             return;
         }
 
@@ -150,6 +171,8 @@ public class GestorTorneo {
         for (int i = 0; i < clasificados.size(); i += 2) {
             enfrentamientos.add(new Enfrentamiento(clasificados.get(i), clasificados.get(i + 1), this.rondaActual));
         }
+
+        notificar();
     }
 
     // Getters
