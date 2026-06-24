@@ -6,6 +6,7 @@ public class Enfrentamiento {
     private float puntaje1;
     private float puntaje2;
     private boolean jugado;
+    private int ronda;
 
     public Enfrentamiento(Participante participante1, Participante participante2) {
         this.participante1 = participante1;
@@ -13,7 +14,11 @@ public class Enfrentamiento {
         puntaje1 = 0;
         puntaje2 = 0;
         jugado = false;
+        this.ronda = ronda;
 
+    }
+
+    public Enfrentamiento(Participante participante1, Participante participante2, int ronda) {
     }
 
     public void registrarResultado(float puntaje1, float puntaje2) {
@@ -32,10 +37,6 @@ public class Enfrentamiento {
         // Si no se enfrenta a nadie, gana automaticamente
         if (participante1 instanceof ParticipanteVacio) return participante2;
         if (participante2 instanceof ParticipanteVacio) return participante1;
-
-        if (!jugado) {
-            return null;
-        }
 
         if (!jugado) {
             return null;
@@ -71,6 +72,8 @@ public class Enfrentamiento {
     public boolean isJugado() {
         return jugado;
     }
+
+    public int getRonda() { return ronda; }
 
     private String puntajeResultados() {
         return jugado ? String.valueOf(puntaje2) : "-";

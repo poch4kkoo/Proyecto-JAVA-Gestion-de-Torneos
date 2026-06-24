@@ -13,6 +13,7 @@ public class GestorTorneo {
     private FormatoTorneo formato;
     private List<Participante> Inscritos;
     private List<Enfrentamiento> enfrentamientos;
+    private int rondaActual;
 
     // El constructor es privado para seguir el patron singleton.
     private GestorTorneo() {
@@ -45,6 +46,7 @@ public class GestorTorneo {
 
     public void generarTorneo() {
         this.enfrentamientos.clear();
+        this.rondaActual = 1;
 
         //Liga simple: todos contra todos
         if (formato == FormatoTorneo.LIGA_SIMPLE) {
@@ -101,6 +103,52 @@ public class GestorTorneo {
             for (int i = 0; i < Inscritos.size(); i += 2) {
                 enfrentamientos.add(new Enfrentamiento(Inscritos.get(i), Inscritos.get(i + 1)));
             }
+        }
+    }
+
+
+    public boolean rondaActualTerminada() {
+        for (Enfrentamiento e : enfrentamientos) {
+            if (e.getRonda() == this.rondaActual && !e.isJugado()) {
+                // avanza de ronda si no hay rival.
+                if (e.getParticipante1() instanceof ParticipanteVacio || e.getParticipante2() instanceof ParticipanteVacio) {
+                    continue;
+                }
+                return false; // Hay partidos pendientes
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Avanza a la siguiente ronda creando una nueva lista con los
+     * ganadores de la anterior ronda
+     *
+     */
+    public void avanzarRonda() {
+
+        List<Participante> clasificados = new ArrayList<>();
+
+        // Añade a los ganadores a la lista de clasificados
+        for (Enfrentamiento e : enfrentamientos) {
+            if (e.getRonda() == this.rondaActual) {
+                Participante ganador = e.getGanador();
+                if (ganador != null) {
+                    clasificados.add(ganador);
+                }
+            }
+        }
+
+        // Comprueba si alguien gano el torneo
+        if (clasificados.size() == 1) {
+            System.out.println("Ganador del Torneo: " + clasificados.get(0).getNombre());
+            return;
+        }
+
+        // Genera los enfrentamientos de esta ronda
+        this.rondaActual++;
+        for (int i = 0; i < clasificados.size(); i += 2) {
+            enfrentamientos.add(new Enfrentamiento(clasificados.get(i), clasificados.get(i + 1), this.rondaActual));
         }
     }
 
