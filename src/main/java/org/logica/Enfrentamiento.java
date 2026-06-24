@@ -28,6 +28,15 @@ public class Enfrentamiento {
     }
 
     public Participante getGanador() {
+
+        // Si no se enfrenta a nadie, gana automaticamente
+        if (participante1 instanceof ParticipanteVacio) return participante2;
+        if (participante2 instanceof ParticipanteVacio) return participante1;
+
+        if (!jugado) {
+            return null;
+        }
+
         if (!jugado) {
             return null;
         }

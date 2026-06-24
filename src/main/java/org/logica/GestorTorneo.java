@@ -57,9 +57,25 @@ public class GestorTorneo {
 
         //Eliminatoria directa: si pierde queda eliminado inmediatamente.
         //Hasta ahora solo se tiene la logica para emparejar para la primera ronda.
-        //lo mas ideal seria que las inscripciones sean un numero par.
+
+        //lo mas ideal seria que las inscripciones sean una potencia de 2.
+        //En caso de que no lo sean, se asignaran Byes
         else if (formato == FormatoTorneo.ELIMINATORIA_DIRECTA) {
-            for (int i = 0; i < Inscritos.size() - 1; i += 2) {
+
+            // Cambia el tamaño de la tabla segun cuantos participantes sean
+            if (Inscritos.size() > 0) {
+                int proximaPotencia = 1;
+                while (proximaPotencia < Inscritos.size()) {
+                    proximaPotencia *= 2;
+                }
+
+                // Si faltan participantes, se agrega un "Bye"
+                while (Inscritos.size() < proximaPotencia) {
+                    Inscritos.add(new ParticipanteVacio());
+                }
+            }
+
+            for (int i = 0; i < Inscritos.size(); i += 2) {
                 enfrentamientos.add(new Enfrentamiento(Inscritos.get(i), Inscritos.get(i + 1)));
             }
         }
@@ -69,10 +85,22 @@ public class GestorTorneo {
         //Solo se tiene la logica para la primera ronda.
         else if (formato == FormatoTorneo.ELIMINATORIA_DOBLE) {
 
-            for (int i = 0; i < Inscritos.size() - 1; i += 2) {
-                enfrentamientos.add(new Enfrentamiento(Inscritos.get(i), Inscritos.get(i + 1)));
+            // Cambia el tamaño de la tabla segun cuantos participantes sean
+            if (Inscritos.size() > 0) {
+                int proximaPotencia = 1;
+                while (proximaPotencia < Inscritos.size()) {
+                    proximaPotencia *= 2;
+                }
+
+                // Si faltan participantes, se agrega un Bye
+                while (Inscritos.size() < proximaPotencia) {
+                    Inscritos.add(new ParticipanteVacio());
+                }
             }
 
+            for (int i = 0; i < Inscritos.size(); i += 2) {
+                enfrentamientos.add(new Enfrentamiento(Inscritos.get(i), Inscritos.get(i + 1)));
+            }
         }
     }
 
