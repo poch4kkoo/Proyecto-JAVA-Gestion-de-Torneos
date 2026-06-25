@@ -98,6 +98,24 @@ public class VentanaRegistro extends JFrame implements Observer {
         add(panelNorte, BorderLayout.NORTH);
         add(panelCentro, BorderLayout.CENTER);
         add(panelSur, BorderLayout.SOUTH);
+
+
+        JPanel panelRegistroCompleto = new JPanel(new BorderLayout());
+        panelRegistroCompleto.add(panelNorte, BorderLayout.NORTH);
+        panelRegistroCompleto.add(panelCentro, BorderLayout.CENTER);
+        panelRegistroCompleto.add(panelSur, BorderLayout.SOUTH);
+
+        // Se crea una barra superior para elegin las pestañas
+        JTabbedPane pestanas = new JTabbedPane();
+
+        // Pestaña Regstro torneo
+        pestanas.addTab("Inscripción y Configuración", panelRegistroCompleto);
+        PanelTablaTorneo panelVisualLlaves = new PanelTablaTorneo();
+
+        // Pestaña de tabla del torneo
+        pestanas.addTab(" Tabla Torneo", panelVisualLlaves);
+
+        add(pestanas, BorderLayout.CENTER);
     }
 
     @Override
