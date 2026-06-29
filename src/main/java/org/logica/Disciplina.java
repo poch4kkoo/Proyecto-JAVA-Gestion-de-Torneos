@@ -9,9 +9,17 @@ public enum Disciplina {
 
         @Override
         public String formatearPuntaje(float p1, float p2) {
-            return " Goles:" + (int)p1 + " - " + (int)p2;
+            return " Goles:" + (int) p1 + " - " + (int) p2;
         }
-    },
+
+        @Override
+        public boolean tipoParticipantePermitido(String tipo) {
+            return tipo.equalsIgnoreCase("Equipo");
+        }
+
+        @Override
+        public boolean tieneModalidadFija() { return true;}
+    }    ,
     AJEDREZ {
         @Override
         public boolean esValido(float p1, float p2) {
@@ -27,6 +35,14 @@ public enum Disciplina {
             return p1 > p2 ? "Gana Blanco (" +p1+ " - "+p2+")"
                     : "Gana Negro (" +p1+" - "+p2+")";
         }
+
+        @Override
+        public boolean tipoParticipantePermitido(String tipo) {
+            return tipo.equalsIgnoreCase("Individual");
+        }
+
+        @Override
+        public boolean tieneModalidadFija() { return true;}
     },
     VIDEOJUEGOS {
         @Override
@@ -38,6 +54,14 @@ public enum Disciplina {
         public String formatearPuntaje(float p1, float p2) {
             return (int)p1 + " - " + (int)p2;
         }
+
+        @Override
+        public boolean tipoParticipantePermitido(String tipo) {
+            return true;
+        }
+
+        @Override
+        public boolean tieneModalidadFija() { return false;}
     },
     TENIS {
         @Override
@@ -50,6 +74,14 @@ public enum Disciplina {
         public String formatearPuntaje(float p1, float p2) {
             return "Sets: " + (int)p1 + " - " + (int)p2;
         }
+
+        @Override
+        public boolean tipoParticipantePermitido(String tipo) {
+            return tipo.equalsIgnoreCase("Equipo");
+        }
+
+        @Override
+        public boolean tieneModalidadFija() { return true;}
     },
     BASQUETBOL {
         @Override
@@ -62,6 +94,14 @@ public enum Disciplina {
         public String formatearPuntaje(float p1, float p2) {
             return "Puntos: " + (int)p1 + " - " + (int)p2;
         }
+
+        @Override
+        public boolean tipoParticipantePermitido(String tipo) {
+            return tipo.equalsIgnoreCase("Equipo");
+        }
+
+        @Override
+        public boolean tieneModalidadFija() { return true;}
     },
     VOLEIBOL {
         @Override
@@ -74,6 +114,14 @@ public enum Disciplina {
         public String formatearPuntaje(float p1, float p2) {
             return "Sets: " + (int)p1 + " - " + (int)p2;
         }
+
+        @Override
+        public boolean tipoParticipantePermitido(String tipo) {
+            return tipo.equalsIgnoreCase("Equipo");
+        }
+
+        @Override
+        public boolean tieneModalidadFija() { return true;}
     },
     BOXEO {
         @Override
@@ -87,7 +135,23 @@ public enum Disciplina {
             if (p1==p2) return "Empate (Tarjetas: "+(int)p1 + " - " + (int)p2 + ")";
             return "Tarjetas: " + (int)p1 + " - " + (int)p2;
         }
+
+        @Override
+        public boolean tipoParticipantePermitido(String tipo) {
+            return tipo.equalsIgnoreCase("Individual");
+        }
+
+        @Override
+        public boolean tieneModalidadFija() { return true;}
     };
+
     public abstract boolean esValido(float p1, float p2);
     public abstract String formatearPuntaje(float p1, float p2);
+
+    //Que tipo de Incripcion o Participante se permite inscribir.
+    //Mas que nada es para seguir la logica real de los torneos (no tiene sentido un torneo de futbol con participantes individuales
+    //o una partida de ajedrez en equipos)
+    public abstract boolean tipoParticipantePermitido(String tipo);
+    public abstract boolean tieneModalidadFija();
+
 }

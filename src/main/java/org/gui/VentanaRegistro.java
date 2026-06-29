@@ -72,28 +72,61 @@ public class VentanaRegistro extends JFrame implements Observer {
         //evento Configurar Torneo
         btnConfigurar.addActionListener((ActionEvent e) -> {
             String nombre=txtNombreTorneo.getText();
-            if(!nombre.isEmpty()) {
-                GestorTorneo.getInstancia().configurarTorneo(nombre, (Disciplina) comboDisciplina.getSelectedItem(), (FormatoTorneo) comboFormato.getSelectedItem());
-                btnInscribir.setEnabled(true);
-                btnConfigurar.setEnabled(false); //bloquear una vez creado
-                txtNombreTorneo.setEnabled(false);
+            Disciplina dis = (Disciplina) comboDisciplina.getSelectedItem();
+            FormatoTorneo form = (FormatoTorneo) comboFormato.getSelectedItem();
+
+
+            if(nombre.trim().isEmpty() || dis == null || form == null) {
+                JOptionPane.showMessageDialog(this, "Complete todos los campos del torneo");
+                return ;
             }
+
+            GestorTorneo.getInstancia().configurarTorneo(nombre, dis, form);
+
+            txtNombreTorneo.setEnabled(false);
+            comboDisciplina.setEnabled(false);
+            comboFormato.setEnabled(false);
+            btnConfigurar.setEnabled(false);
+
+            comboTipoParticipante.setEnabled(false);
+
+            btnInscribir.setEnabled(true);
         });
 
         // Evento Inscribir (USA EL FACTORY PATTERN)
         btnInscribir.addActionListener((ActionEvent e) -> {
-            String tipo=(String) comboTipoParticipante.getSelectedItem();
-            String nombre=txtNombreParticipante.getText();
+            String nombrePart = txtNombreParticipante.getText();
 
-            if(!nombre.isEmpty()) {
-                //usamos fabrica para crear al participante
-                Participante nuevo = ParticipanteFactory.crearParticipante(tipo, "ID-" + System.currentTimeMillis(), nombre, "Sin Contacto");
-
-                //al inscribirlo, el GestorTorneo llamara a notificar(), lo que gatillara nuestro metodo actualizar()
-                GestorTorneo.getInstancia().inscribirParticipante(nuevo);
-                txtNombreParticipante.setText("");
+            if (nombrePart.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Ingrese un nombre válido.");
+                return;
             }
+
+            String tipo = (String) comboTipoParticipante.getSelectedItem();
+            if (tipo == null) {
+                Disciplina disActual = (Disciplina) comboDisciplina.getSelectedItem();
+                if (disActual != null) {
+                    // Si la disciplina acepta individual, es Jugador. en el caso contrario, Equipo.
+                    tipo = disActual.tipoParticipantePermitido("Individual") ? "Jugador" : "Equipo";
+                } else {
+                    tipo = "Jugador"; //Se pone por defecto
+                }
+            }
+
+            String idRandom = "ID-" + nombrePart.toUpperCase().replaceAll("\\s+", "");
+
+            // Crear e inscribir utilizando la fábrica
+            Participante nuevo = ParticipanteFactory.crearParticipante(tipo, idRandom, nombrePart, "Contacto");
+            GestorTorneo.getInstancia().inscribirParticipante(nuevo);
+
+            txtNombreParticipante.setText("");
         });
+
+        comboDisciplina.addActionListener((ActionEvent e) -> {
+            actualizarSugerenciaParticipante();
+        });
+
+        actualizarSugerenciaParticipante();
 
         add(panelNorte, BorderLayout.NORTH);
         add(panelCentro, BorderLayout.CENTER);
@@ -139,5 +172,26 @@ public class VentanaRegistro extends JFrame implements Observer {
         SwingUtilities.invokeLater(() -> {
             new VentanaRegistro().setVisible(true);
         });
+    }
+
+    private void actualizarSugerenciaParticipante() {
+        //si ya se configuro el torneo, no se altera nada de la interfaz
+        if (!btnConfigurar.isEnabled()) return;
+
+        Disciplina seleccionada = (Disciplina) comboDisciplina.getSelectedItem();
+        if (seleccionada == null) return;
+
+        if (seleccionada.tieneModalidadFija()) {
+            // si la disciplina es "fija" (solo individual o solo equipos) se cambia la seleccion a estas y se "congela"
+            if (seleccionada.tipoParticipantePermitido("Individual")) {
+                comboTipoParticipante.setSelectedItem("Jugador");
+            } else if (seleccionada.tipoParticipantePermitido("Equipo")) {
+                comboTipoParticipante.setSelectedItem("Equipo");
+            }
+            comboTipoParticipante.setEnabled(false);
+        } else {
+            // Caso de Videojuegos, se permite que se elija libremente
+            comboTipoParticipante.setEnabled(true);
+        }
     }
 }
