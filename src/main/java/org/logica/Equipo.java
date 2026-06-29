@@ -15,6 +15,8 @@ public class Equipo extends Participante{
         this.nombresMiembros.add(nombreJugador);
     }
 
+    public void removerMiembro(String nombreJugador) { this.nombresMiembros.remove(nombreJugador);}
+
     public List<String> getNombresMiembros() {
         return nombresMiembros;
     }

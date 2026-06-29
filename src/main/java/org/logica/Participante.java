@@ -14,8 +14,10 @@ public abstract class Participante {
     public String getId() { return id; }
     public String getNombre() { return nombre; }
     public String getContacto() { return contacto; }
-
     public abstract String getTipo();
+
+    public void setNombre(String nombre) { this.nombre = nombre; }
+    public void setContacto(String contacto) { this.contacto = contacto; }
 
     @Override
     public String toString() {

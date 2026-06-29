@@ -62,6 +62,11 @@ public class GestorTorneo {
         notificar();
     }
 
+    public void eliminarParticipante(Participante participante) {
+        this.Inscritos.remove(participante);
+        notificar();
+    }
+
     public void generarTorneo() {
         this.enfrentamientos.clear();
         this.rondaActual = 1;

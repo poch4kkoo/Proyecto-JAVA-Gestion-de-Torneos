@@ -13,7 +13,16 @@ public class VentanaRegistro extends JFrame implements Observer {
 
     private JComboBox<String> comboTipoParticipante;
     private JTextField txtNombreParticipante;
+    private JTextField txtContactoParticipante;
     private JButton btnInscribir;
+
+    private JPanel panelMiembros;
+    private JTextField txtMiembro;
+    private JButton btnAgregarMiembro;
+    private DefaultListModel<String> modeloMiembrosPendientes;
+    private JList<String> listaMiembrosPendientes;
+
+    private JButton btnGestionarInscritos;
 
     private DefaultListModel<String> modeloListaInscritos;
     private JList<String> listaInscritosVisual;
@@ -46,20 +55,59 @@ public class VentanaRegistro extends JFrame implements Observer {
         panelNorte.add(btnConfigurar);
 
         //panel central: inscribir participantes
-        JPanel panelCentro=new JPanel(new GridLayout(3, 2, 5, 5));
+        JPanel panelCentro=new JPanel(new BorderLayout());
         panelCentro.setBorder(BorderFactory.createTitledBorder("2. Inscripción de Participantes"));
 
+        JPanel panelDatosParticipante = new JPanel(new GridLayout(4, 2, 5, 5));
         comboTipoParticipante=new JComboBox<>(new String[]{"Jugador", "Equipo"});
         txtNombreParticipante=new JTextField();
-        btnInscribir = new JButton("Inscribir Participante");
+        txtContactoParticipante=new JTextField();
+        btnInscribir = new JButton("Inscribir");
         btnInscribir.setEnabled(false); // Se activa cuando se crea el torneo
 
-        panelCentro.add(new JLabel("Tipo:"));
-        panelCentro.add(comboTipoParticipante);
-        panelCentro.add(new JLabel("Nombre:"));
-        panelCentro.add(txtNombreParticipante);
-        panelCentro.add(new JLabel(""));
-        panelCentro.add(btnInscribir);
+        panelDatosParticipante.add(new JLabel("Tipo:"));
+        panelDatosParticipante.add(comboTipoParticipante);
+        panelDatosParticipante.add(new JLabel("Nombre:"));
+        panelDatosParticipante.add(txtNombreParticipante);
+        panelDatosParticipante.add(new JLabel("Contacto:"));
+        panelDatosParticipante.add(txtContactoParticipante);
+        panelDatosParticipante.add(new JLabel(""));
+        panelDatosParticipante.add(btnInscribir);
+
+        // Panel para agregar miembros de un equipo (solo se muestra cuando Tipo == Equipo)
+        panelMiembros = new JPanel(new BorderLayout(5, 5));
+        panelMiembros.setBorder(BorderFactory.createTitledBorder("Miembros del Equipo (a inscribir)"));
+
+        JPanel panelAgregarMiembro = new JPanel(new BorderLayout(5, 5));
+        txtMiembro = new JTextField();
+        btnAgregarMiembro = new JButton("Agregar Miembro");
+        panelAgregarMiembro.add(txtMiembro, BorderLayout.CENTER);
+        panelAgregarMiembro.add(btnAgregarMiembro, BorderLayout.EAST);
+
+        modeloMiembrosPendientes = new DefaultListModel<>();
+        listaMiembrosPendientes = new JList<>(modeloMiembrosPendientes);
+
+        panelMiembros.add(panelAgregarMiembro, BorderLayout.NORTH);
+        panelMiembros.add(new JScrollPane(listaMiembrosPendientes), BorderLayout.CENTER);
+        panelMiembros.setVisible(false); // arranca oculto, solo aplica a Equipo
+
+        panelCentro.add(panelDatosParticipante, BorderLayout.NORTH);
+        panelCentro.add(panelMiembros, BorderLayout.CENTER);
+
+        btnAgregarMiembro.addActionListener((ActionEvent e) -> {
+            String nombreMiembro = txtMiembro.getText().trim();
+            if (nombreMiembro.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Ingrese el nombre del miembro.");
+                return;
+            }
+            modeloMiembrosPendientes.addElement(nombreMiembro);
+            txtMiembro.setText("");
+        });
+
+        comboTipoParticipante.addActionListener((ActionEvent e) -> {
+            String tipo = (String) comboTipoParticipante.getSelectedItem();
+            panelMiembros.setVisible("Equipo".equalsIgnoreCase(tipo));
+        });
 
         //panel sur: lista de inscritos(OBSERVER)
         JPanel panelSur=new JPanel(new BorderLayout());
@@ -67,6 +115,15 @@ public class VentanaRegistro extends JFrame implements Observer {
         modeloListaInscritos=new DefaultListModel<>();
         listaInscritosVisual=new JList<>(modeloListaInscritos);
         panelSur.add(new JScrollPane(listaInscritosVisual), BorderLayout.CENTER);
+
+        btnGestionarInscritos = new JButton("Gestionar Inscritos");
+        JPanel panelBotonGestion = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        panelBotonGestion.add(btnGestionarInscritos);
+        panelSur.add(panelBotonGestion, BorderLayout.SOUTH);
+
+        btnGestionarInscritos.addActionListener((ActionEvent e) -> {
+            new VentanaGestionInscritos(this).setVisible(true);
+        });
 
         //eventos de los botones
         //evento Configurar Torneo
@@ -89,16 +146,21 @@ public class VentanaRegistro extends JFrame implements Observer {
             btnConfigurar.setEnabled(false);
 
             comboTipoParticipante.setEnabled(false);
-
             btnInscribir.setEnabled(true);
         });
 
         // Evento Inscribir (USA EL FACTORY PATTERN)
         btnInscribir.addActionListener((ActionEvent e) -> {
             String nombrePart = txtNombreParticipante.getText();
+            String contactoPart = txtContactoParticipante.getText().trim();
 
             if (nombrePart.trim().isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Ingrese un nombre válido.");
+                return;
+            }
+
+            if (contactoPart.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Ingrese un dato de contacto.");
                 return;
             }
 
@@ -106,20 +168,34 @@ public class VentanaRegistro extends JFrame implements Observer {
             if (tipo == null) {
                 Disciplina disActual = (Disciplina) comboDisciplina.getSelectedItem();
                 if (disActual != null) {
-                    // Si la disciplina acepta individual, es Jugador. en el caso contrario, Equipo.
                     tipo = disActual.tipoParticipantePermitido("Individual") ? "Jugador" : "Equipo";
                 } else {
                     tipo = "Jugador"; //Se pone por defecto
                 }
             }
 
+            if ("Equipo".equalsIgnoreCase(tipo) && modeloMiembrosPendientes.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Agregue al menos un miembro al equipo.");
+                return;
+            }
+
             String idRandom = "ID-" + nombrePart.toUpperCase().replaceAll("\\s+", "");
 
-            // Crear e inscribir utilizando la fábrica
-            Participante nuevo = ParticipanteFactory.crearParticipante(tipo, idRandom, nombrePart, "Contacto");
+            // Crear e inscribir utilizando la fábrica original
+            Participante nuevo = ParticipanteFactory.crearParticipante(tipo, idRandom, nombrePart, contactoPart);
+
+            if (nuevo instanceof Equipo) {
+                Equipo equipoNuevo = (Equipo) nuevo;
+                for (int i = 0; i < modeloMiembrosPendientes.size(); i++) {
+                    equipoNuevo.agregarMiembro(modeloMiembrosPendientes.get(i));
+                }
+                modeloMiembrosPendientes.clear();
+            }
+
             GestorTorneo.getInstancia().inscribirParticipante(nuevo);
 
             txtNombreParticipante.setText("");
+            txtContactoParticipante.setText("");
         });
 
         comboDisciplina.addActionListener((ActionEvent e) -> {
@@ -167,7 +243,7 @@ public class VentanaRegistro extends JFrame implements Observer {
             setTitle("Torneo: " + gestor.getNombre() + " | " + gestor.getDisciplina() + " - Inscritos: " + gestor.getInscritos().size());
         }
     }
-//metodo main para que se pueda probar la ventana al instante
+    //metodo main para que se pueda probar la ventana al instante
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             new VentanaRegistro().setVisible(true);
