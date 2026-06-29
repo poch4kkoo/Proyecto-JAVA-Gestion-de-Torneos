@@ -77,11 +77,11 @@ public enum Disciplina {
 
         @Override
         public boolean tipoParticipantePermitido(String tipo) {
-            return tipo.equalsIgnoreCase("Equipo");
+            return true;
         }
 
         @Override
-        public boolean tieneModalidadFija() { return true;}
+        public boolean tieneModalidadFija() { return false;}
     },
     BASQUETBOL {
         @Override
