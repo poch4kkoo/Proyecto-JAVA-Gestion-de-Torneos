@@ -22,6 +22,9 @@ public class VentanaRegistro extends JFrame implements Observer {
     private DefaultListModel<String> modeloMiembrosPendientes;
     private JList<String> listaMiembrosPendientes;
 
+    private JLabel lblAvatarPreview;
+    private String rutaAvatarActual = "avatar_0.png";
+
     private JButton btnGestionarInscritos;
 
     private DefaultListModel<String> modeloListaInscritos;
@@ -55,26 +58,64 @@ public class VentanaRegistro extends JFrame implements Observer {
         panelNorte.add(btnConfigurar);
 
         //panel central: inscribir participantes
-        JPanel panelCentro=new JPanel(new BorderLayout());
+        JPanel panelCentro = new JPanel(new BorderLayout());
         panelCentro.setBorder(BorderFactory.createTitledBorder("2. Inscripción de Participantes"));
 
-        JPanel panelDatosParticipante = new JPanel(new GridLayout(4, 2, 5, 5));
-        comboTipoParticipante=new JComboBox<>(new String[]{"Jugador", "Equipo"});
-        txtNombreParticipante=new JTextField();
-        txtContactoParticipante=new JTextField();
+        JPanel panelDatosParticipante = new JPanel(new BorderLayout(10, 10));
+
+        // Datos de los jugadores/equipos
+        JPanel panelFormulario = new JPanel(new GridLayout(4, 2, 5, 5));
+        comboTipoParticipante = new JComboBox<>(new String[]{"Jugador", "Equipo"});
+        txtNombreParticipante = new JTextField();
+        txtContactoParticipante = new JTextField();
         btnInscribir = new JButton("Inscribir");
-        btnInscribir.setEnabled(false); // Se activa cuando se crea el torneo
+        btnInscribir.setEnabled(false); // Ativado apenas após criar o torneio
 
-        panelDatosParticipante.add(new JLabel("Tipo:"));
-        panelDatosParticipante.add(comboTipoParticipante);
-        panelDatosParticipante.add(new JLabel("Nombre:"));
-        panelDatosParticipante.add(txtNombreParticipante);
-        panelDatosParticipante.add(new JLabel("Contacto:"));
-        panelDatosParticipante.add(txtContactoParticipante);
-        panelDatosParticipante.add(new JLabel(""));
-        panelDatosParticipante.add(btnInscribir);
+        panelFormulario.add(new JLabel("Tipo:"));
+        panelFormulario.add(comboTipoParticipante);
+        panelFormulario.add(new JLabel("Nombre:"));
+        panelFormulario.add(txtNombreParticipante);
+        panelFormulario.add(new JLabel("Contacto:"));
+        panelFormulario.add(txtContactoParticipante);
+        panelFormulario.add(new JLabel(""));
+        panelFormulario.add(btnInscribir);
 
-        // Panel para agregar miembros de un equipo (solo se muestra cuando Tipo == Equipo)
+        // Previsualizacion de la bandera del equipo
+        lblAvatarPreview = new JLabel("Sin Imagen");
+        lblAvatarPreview.setHorizontalAlignment(SwingConstants.CENTER);
+        lblAvatarPreview.setPreferredSize(new Dimension(80, 80));
+        lblAvatarPreview.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+
+        JButton btnCambiarAvatar = new JButton("Imagen Personalizada");
+
+        JPanel panelAvatar = new JPanel(new BorderLayout(5, 5));
+        panelAvatar.add(lblAvatarPreview, BorderLayout.CENTER);
+        panelAvatar.add(btnCambiarAvatar, BorderLayout.SOUTH);
+
+        // Evento para seleccionar imagen personalizada
+        btnCambiarAvatar.addActionListener((ActionEvent e) -> {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setDialogTitle("Selecciona el avatar o bandera");
+            fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Imágenes", "jpg", "png", "jpeg"));
+
+            int seleccion = fileChooser.showOpenDialog(this);
+            if (seleccion == JFileChooser.APPROVE_OPTION) {
+                java.io.File archivoSeleccionado = fileChooser.getSelectedFile();
+                rutaAvatarActual = archivoSeleccionado.getAbsolutePath();
+
+                // Icono nuevo seleccionado
+                ImageIcon iconoNuevo = new ImageIcon(rutaAvatarActual);
+                Image img = iconoNuevo.getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH);
+                lblAvatarPreview.setIcon(new ImageIcon(img));
+                lblAvatarPreview.setText("");
+            }
+        });
+
+
+
+        panelDatosParticipante.add(panelAvatar, BorderLayout.WEST);
+        panelDatosParticipante.add(panelFormulario, BorderLayout.CENTER);
+
         panelMiembros = new JPanel(new BorderLayout(5, 5));
         panelMiembros.setBorder(BorderFactory.createTitledBorder("Miembros del Equipo (a inscribir)"));
 
@@ -89,8 +130,29 @@ public class VentanaRegistro extends JFrame implements Observer {
 
         panelMiembros.add(panelAgregarMiembro, BorderLayout.NORTH);
         panelMiembros.add(new JScrollPane(listaMiembrosPendientes), BorderLayout.CENTER);
-        panelMiembros.setVisible(false); // arranca oculto, solo aplica a Equipo
+        panelMiembros.setVisible(false); // Inicializa oculto
 
+        panelCentro.add(panelDatosParticipante, BorderLayout.NORTH);
+        panelCentro.add(panelMiembros, BorderLayout.CENTER);
+
+        // Panel para agregar miembros de un equipo
+        panelMiembros = new JPanel(new BorderLayout(5, 5));
+        panelMiembros.setBorder(BorderFactory.createTitledBorder("Miembros del Equipo (a inscribir)"));
+
+        panelAgregarMiembro = new JPanel(new BorderLayout(5, 5));
+        txtMiembro = new JTextField();
+        btnAgregarMiembro = new JButton("Agregar Miembro");
+        panelAgregarMiembro.add(txtMiembro, BorderLayout.CENTER);
+        panelAgregarMiembro.add(btnAgregarMiembro, BorderLayout.EAST);
+
+        modeloMiembrosPendientes = new DefaultListModel<>();
+        listaMiembrosPendientes = new JList<>(modeloMiembrosPendientes);
+
+        panelMiembros.add(panelAgregarMiembro, BorderLayout.NORTH);
+        panelMiembros.add(new JScrollPane(listaMiembrosPendientes), BorderLayout.CENTER);
+        panelMiembros.setVisible(false); // Arranca oculto, solo aplica a Equipo
+
+        // Lista de miembros al centro
         panelCentro.add(panelDatosParticipante, BorderLayout.NORTH);
         panelCentro.add(panelMiembros, BorderLayout.CENTER);
 
@@ -154,6 +216,7 @@ public class VentanaRegistro extends JFrame implements Observer {
             String nombrePart = txtNombreParticipante.getText();
             String contactoPart = txtContactoParticipante.getText().trim();
 
+
             if (nombrePart.trim().isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Ingrese un nombre válido.");
                 return;
@@ -183,6 +246,9 @@ public class VentanaRegistro extends JFrame implements Observer {
 
             // Crear e inscribir utilizando la fábrica original
             Participante nuevo = ParticipanteFactory.crearParticipante(tipo, idRandom, nombrePart, contactoPart);
+
+            // Asignamos el avatar actual
+            nuevo.setRutaAvatar(rutaAvatarActual);
 
             if (nuevo instanceof Equipo) {
                 Equipo equipoNuevo = (Equipo) nuevo;
