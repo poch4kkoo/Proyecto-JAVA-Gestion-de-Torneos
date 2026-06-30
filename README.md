@@ -17,7 +17,7 @@ Este proyecto fue desarrollado asplicando una separacion estricta entre la logic
 
 2. Strategy(Comportamiento):Implementado a traves del enum "Disciplina". Aprovechando las capacidades avanzadas de Java, cada deporte actua como una estrategia concreta que sobrescribe metodos abstractos como "esValido()" y "formatearPuntaje()". Esto permite agregar nuevas reglas o deportes en el futuro sin modificar la logica del torneo (Principio open/closed).
 
-3. Observer(Comportamiento):Utilizado para lograr un desacoplamiento total entre el Modelo y la Vista. La clase "GestorTorneo" actua como el Sujeto/Observable, mientras que las vistas como "VentanaRegistro" y "PanelTablaTorneo" implementan la interfaz `Observer`. Cada vez que hay un cambio en las inscripciones o enfrentamientos, el gestor notifica a las vistas para que se actualicen de forma reactiva.
+3. Observer(Comportamiento):Utilizado para lograr un desacoplamiento total entre el Modelo y la Vista. La clase "GestorTorneo" actua como el Sujeto/Observable, mientras que las vistas como "VentanaRegistro" y "PanelTablaTorneo" implementan la interfaz "Observer". Cada vez que hay un cambio en las inscripciones o enfrentamientos, el gestor notifica a las vistas para que se actualicen de forma reactiva.
 
 El diagrama UML se completo mediante las herramientas de git
 
@@ -113,6 +113,9 @@ classDiagram
         AJEDREZ
         VIDEOJUEGOS
         BOXEO
+        TENIS
+        VOLEIBOL
+        BASQUETBOL
         +esValido(p1: float, p2: float) boolean
     }
 
