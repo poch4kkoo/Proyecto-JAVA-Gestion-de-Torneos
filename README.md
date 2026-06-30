@@ -127,9 +127,9 @@ classDiagram
     }
 
     %% Relaciones de Asociación y Composición
-    GestorTorneo o-- Observer : -observadores (0..*)
-    GestorTorneo o-- Participante : -Inscritos (0..*)
-    GestorTorneo o-- Enfrentamiento : -enfrentamientos (0..*)
+    GestorTorneo o-- Observer : -observadores 
+    GestorTorneo o-- Participante : -Inscritos 
+    GestorTorneo o-- Enfrentamiento : -enfrentamientos
     GestorTorneo --> Disciplina : -disciplina
     GestorTorneo --> FormatoTorneo : -formato
     GestorTorneo --> GestorTorneo : -instanciaUnica
