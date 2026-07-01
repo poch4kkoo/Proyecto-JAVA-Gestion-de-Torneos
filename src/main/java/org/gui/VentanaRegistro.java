@@ -24,6 +24,8 @@ public class VentanaRegistro extends JFrame implements Observer {
 
     private JLabel lblAvatarPreview;
     private String rutaAvatarActual = "avatar_0.png";
+    private JComboBox<String> comboCategoria;
+    private JComboBox<String> comboArchivo;
 
     private JButton btnGestionarInscritos;
 
@@ -81,29 +83,63 @@ public class VentanaRegistro extends JFrame implements Observer {
         panelFormulario.add(btnInscribir);
 
         // Previsualizacion de la bandera del equipo
-        lblAvatarPreview = new JLabel("Sin Imagen");
-        lblAvatarPreview.setHorizontalAlignment(SwingConstants.CENTER);
+        comboCategoria = new JComboBox<>(new String[]{"Banderas", "Avatares", "Personajes"});
+        comboArchivo = new JComboBox<>();
+
+        // Actualiza los archivos disponibles según la categoría elegida
+        comboCategoria.addActionListener(e -> actualizarComboArchivos());
+        actualizarComboArchivos(); // Carga inicial
+
+        JButton btnAplicarAvatar = new JButton("Aplicar");
+
+        JButton btnImagenPersonalizada = new JButton("Subir desde PC...");
+
+        // Panel de control para las fotos de la app
+        JPanel panelSelectoresImg = new JPanel(new GridLayout(3, 1, 2, 2));
+        panelSelectoresImg.add(comboCategoria);
+        panelSelectoresImg.add(comboArchivo);
+        panelSelectoresImg.add(btnAplicarAvatar);
+        panelSelectoresImg.add(btnImagenPersonalizada);
+
+        // Vista previa física de la imagen
+        lblAvatarPreview = new JLabel();
         lblAvatarPreview.setPreferredSize(new Dimension(80, 80));
         lblAvatarPreview.setBorder(BorderFactory.createLineBorder(Color.GRAY));
 
-        JButton btnCambiarAvatar = new JButton("Imagen Personalizada");
+        lblAvatarPreview.setHorizontalAlignment(SwingConstants.CENTER);
+        lblAvatarPreview.setVerticalAlignment(SwingConstants.CENTER);
 
-        JPanel panelAvatar = new JPanel(new BorderLayout(5, 5));
-        panelAvatar.add(lblAvatarPreview, BorderLayout.CENTER);
-        panelAvatar.add(btnCambiarAvatar, BorderLayout.SOUTH);
+        // Cargar imagen por defecto inicial
+        cargarImagenInterna("Avatares", "avatar_0.png");
 
-        // Evento para seleccionar imagen personalizada
-        btnCambiarAvatar.addActionListener((ActionEvent e) -> {
+        // contenedor para el bloque izquierdo
+        JPanel panelAvatarCompleto = new JPanel(new BorderLayout(5, 5));
+        panelAvatarCompleto.add(lblAvatarPreview, BorderLayout.CENTER);
+        panelAvatarCompleto.add(panelSelectoresImg, BorderLayout.SOUTH);
+
+        // Evento para aplicar la imagen seleccionada de los combos
+        btnAplicarAvatar.addActionListener(e -> {
+            String cat = (String) comboCategoria.getSelectedItem();
+            String arc = (String) comboArchivo.getSelectedItem();
+            if (cat != null && arc != null) {
+                cargarImagenInterna(cat, arc);
+            }
+        });
+
+
+        // Evento para que el usuario pueda subir una imagens desde su pc
+        btnImagenPersonalizada.addActionListener((ActionEvent e) -> {
             JFileChooser fileChooser = new JFileChooser();
-            fileChooser.setDialogTitle("Selecciona el avatar o bandera");
+            fileChooser.setDialogTitle("Selecciona tu imagen personalizada");
             fileChooser.setFileFilter(new javax.swing.filechooser.FileNameExtensionFilter("Imágenes", "jpg", "png", "jpeg"));
 
             int seleccion = fileChooser.showOpenDialog(this);
             if (seleccion == JFileChooser.APPROVE_OPTION) {
                 java.io.File archivoSeleccionado = fileChooser.getSelectedFile();
+                // Guardamos la ruta absoluta de la imagen
                 rutaAvatarActual = archivoSeleccionado.getAbsolutePath();
 
-                // Icono nuevo seleccionado
+                // Actualizamos la vista previa
                 ImageIcon iconoNuevo = new ImageIcon(rutaAvatarActual);
                 Image img = iconoNuevo.getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH);
                 lblAvatarPreview.setIcon(new ImageIcon(img));
@@ -112,9 +148,10 @@ public class VentanaRegistro extends JFrame implements Observer {
         });
 
 
-
-        panelDatosParticipante.add(panelAvatar, BorderLayout.WEST);
+        panelDatosParticipante.add(panelAvatarCompleto, BorderLayout.WEST);
         panelDatosParticipante.add(panelFormulario, BorderLayout.CENTER);
+
+
 
         panelMiembros = new JPanel(new BorderLayout(5, 5));
         panelMiembros.setBorder(BorderFactory.createTitledBorder("Miembros del Equipo (a inscribir)"));
@@ -334,6 +371,63 @@ public class VentanaRegistro extends JFrame implements Observer {
         } else {
             // Caso de Videojuegos, se permite que se elija libremente
             comboTipoParticipante.setEnabled(true);
+        }
+    }
+
+
+    /**
+     * Llena el combo de archivos dependiendo de la categoria seleccionada
+     */
+    private void actualizarComboArchivos() {
+        comboArchivo.removeAllItems();
+        String categoria = (String) comboCategoria.getSelectedItem();
+
+        if ("Banderas".equals(categoria)) {
+            comboArchivo.addItem("alemania.png");
+            comboArchivo.addItem("argentina.png");
+            comboArchivo.addItem("brasil.png");
+            comboArchivo.addItem("chile.png");
+            comboArchivo.addItem("china.png");
+            comboArchivo.addItem("colombia.png");
+            comboArchivo.addItem("ecuador.png");
+            comboArchivo.addItem("espana.png");
+            comboArchivo.addItem("estados-unidos.png");
+            comboArchivo.addItem("francia.png");
+            comboArchivo.addItem("italia.png");
+            comboArchivo.addItem("marruecos.png");
+            comboArchivo.addItem("mexico.png");
+            comboArchivo.addItem("panama.png");
+            comboArchivo.addItem("paraguay.png");
+            comboArchivo.addItem("peru.png");
+            comboArchivo.addItem("portugal.png");
+            comboArchivo.addItem("reino-unido.png");
+            comboArchivo.addItem("uruguay.png");
+            comboArchivo.addItem("venezuela.png");
+            
+        } else if ("Avatares".equals(categoria)) {
+            comboArchivo.addItem("avatar_0.png");
+
+        } else if ("Personajes".equals(categoria)) {
+
+        }
+    }
+
+    /**
+     * Carga la imagen
+     */
+    private void cargarImagenInterna(String categoria, String archivo) {
+        // ruta para la imagen seleccionada
+        String rutaInterna = "imagenes/" + categoria + "/" + archivo;
+        java.net.URL urlImg = VentanaRegistro.class.getResource(rutaInterna);
+
+        if (urlImg != null) {
+            ImageIcon icono = new ImageIcon(urlImg);
+            Image imgEscalada = icono.getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH);
+            lblAvatarPreview.setIcon(new ImageIcon(imgEscalada));
+            lblAvatarPreview.setText("");
+
+            // Guardamos la ruta para asignarla al Participante
+            rutaAvatarActual = "src/main/resources/org/gui/" + rutaInterna;
         }
     }
 }
