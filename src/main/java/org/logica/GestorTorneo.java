@@ -94,14 +94,20 @@ public class GestorTorneo {
                     proximaPotencia *= 2;
                 }
 
-                // Si faltan participantes, se agrega un "Bye"
-                while (Inscritos.size() < proximaPotencia) {
-                    Inscritos.add(new ParticipanteVacio());
-                }
-            }
+                int cantidadByes = proximaPotencia - Inscritos.size();
+                int indiceActual = 0;
 
-            for (int i = 0; i < Inscritos.size(); i += 2) {
-                enfrentamientos.add(new Enfrentamiento(Inscritos.get(i), Inscritos.get(i + 1)));
+                // Emparejamos a los participantes con un bye
+                for (int i = 0; i < cantidadByes; i++) {
+                    enfrentamientos.add(new Enfrentamiento(Inscritos.get(indiceActual), new ParticipanteVacio()));
+                    indiceActual++;
+                }
+
+                // Emparejamos a los demas participantes
+                while (indiceActual < Inscritos.size()) {
+                    enfrentamientos.add(new Enfrentamiento(Inscritos.get(indiceActual), Inscritos.get(indiceActual + 1)));
+                    indiceActual += 2;
+                }
             }
         }
 
@@ -117,14 +123,20 @@ public class GestorTorneo {
                     proximaPotencia *= 2;
                 }
 
-                // Si faltan participantes, se agrega un Bye
-                while (Inscritos.size() < proximaPotencia) {
-                    Inscritos.add(new ParticipanteVacio());
-                }
-            }
+                int cantidadByes = proximaPotencia - Inscritos.size();
+                int indiceActual = 0;
 
-            for (int i = 0; i < Inscritos.size(); i += 2) {
-                enfrentamientos.add(new Enfrentamiento(Inscritos.get(i), Inscritos.get(i + 1)));
+                // Emparejamos a los participantes con un bye
+                for (int i = 0; i < cantidadByes; i++) {
+                    enfrentamientos.add(new Enfrentamiento(Inscritos.get(indiceActual), new ParticipanteVacio()));
+                    indiceActual++;
+                }
+
+                // Emparejamos a los demas participantes
+                while (indiceActual < Inscritos.size()) {
+                    enfrentamientos.add(new Enfrentamiento(Inscritos.get(indiceActual), Inscritos.get(indiceActual + 1)));
+                    indiceActual += 2;
+                }
             }
         }
 
