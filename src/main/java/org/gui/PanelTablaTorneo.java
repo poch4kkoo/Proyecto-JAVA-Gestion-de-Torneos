@@ -72,7 +72,7 @@ public class PanelTablaTorneo extends JPanel implements org.logica.Observer {
         }
 
         boolean esEliminatoria = gestor.getFormato() != FormatoTorneo.LIGA_SIMPLE;
-        btnSiguienteRonda.setEnabled( esEliminatoria && !gestor.getEnfrentamientos().isEmpty() && gestor.rondaActualTerminada());
+        btnSiguienteRonda.setEnabled(esEliminatoria && !gestor.getEnfrentamientos().isEmpty() && gestor.rondaActualTerminada());
 
         panelArbol.revalidate();
         panelArbol.repaint();
@@ -104,17 +104,30 @@ public class PanelTablaTorneo extends JPanel implements org.logica.Observer {
         lblTabla.setBorder(BorderFactory.createEmptyBorder(8, 10, 4, 10));
         panelArbol.add(lblTabla);
 
-        String[] columnas = {"#", "Participante", "PJ", "G", "E", "P", "Pts"};
+
+        String[] columnas = {"#", "Logo", "Participante", "PJ", "G", "E", "P", "Pts"};
         DefaultTableModel modeloTabla = new DefaultTableModel(columnas, 0) {
             @Override public boolean isCellEditable(int r, int c) {
-                return false; }
+                return false;
+            }
+
+            // dibuja el icono en la columna 1
+            @Override public Class<?> getColumnClass(int columnIndex) {
+                if (columnIndex == 1) return ImageIcon.class;
+                return super.getColumnClass(columnIndex);
+            }
         };
 
         for (int[] fila : calcularPosiciones(gestor)) {
             Participante p = gestor.getInscritos().get(fila[0]);
             if (p instanceof ParticipanteVacio) continue;
+
+            // Obtenemos el ícono escalado
+            ImageIcon icono = obtenerIconoEscalado(p.getRutaAvatar(), 22, 22);
+
             modeloTabla.addRow(new Object[]{
                     modeloTabla.getRowCount() + 1,
+                    icono,
                     p.getNombre(),
                     fila[1], fila[2], fila[3], fila[4], fila[5]
             });
@@ -122,11 +135,16 @@ public class PanelTablaTorneo extends JPanel implements org.logica.Observer {
 
         JTable tabla = new JTable(modeloTabla);
         tabla.setFillsViewportHeight(true);
-        tabla.setRowHeight(22);
+        tabla.setRowHeight(28);
+        tabla.getColumnModel().getColumn(0).setMaxWidth(30);
+        tabla.getColumnModel().getColumn(1).setMaxWidth(45); // Columna del Logo
+
         JScrollPane scrollTabla = new JScrollPane(tabla);
-        scrollTabla.setPreferredSize(new Dimension(500, Math.min(150, (modeloTabla.getRowCount() + 1) * 23)));
-        scrollTabla.setMaximumSize(new Dimension(Integer.MAX_VALUE, 200));
-        scrollTabla.setAlignmentX(Component.LEFT_ALIGNMENT);
+        scrollTabla.setPreferredSize(new Dimension(500, Math.min(150, (modeloTabla.getRowCount() + 1) * 29)));
+
+        // Ubicacion y tamaño Tabla liga
+        scrollTabla.setMaximumSize(new Dimension(500, 200));
+        scrollTabla.setAlignmentX(Component.CENTER_ALIGNMENT);
         panelArbol.add(scrollTabla);
 
         JLabel lblPartidos = new JLabel("  Partidos");
@@ -159,7 +177,7 @@ public class PanelTablaTorneo extends JPanel implements org.logica.Observer {
                 stats[i1][3]++; stats[i2][3]++;
                 stats[i1][5]++; stats[i2][5]++;
             } else if (ganador == enf.getParticipante1()) {
-                stats[i1][2]++; stats[i2][4]++; // G y P
+                stats[i1][2]++; stats[i2][4]++;
                 stats[i1][5] += 3;
             } else {
                 stats[i2][2]++; stats[i1][4]++;
@@ -176,37 +194,85 @@ public class PanelTablaTorneo extends JPanel implements org.logica.Observer {
     //si ya se jugo (verde), esta pendiente (amarillo), si se da un pase automatico (gris)
     private JPanel crearFilaEnfrentamiento(Enfrentamiento enf) {
         JPanel fila = new JPanel(new BorderLayout(10, 0));
-        fila.setMaximumSize(new Dimension(Integer.MAX_VALUE, 36));
-        fila.setBorder(BorderFactory.createEmptyBorder(3, 10, 3, 10));
+        fila.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
+        fila.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
         boolean esPaseAutomatico = (enf.getParticipante1() instanceof ParticipanteVacio || enf.getParticipante2() instanceof ParticipanteVacio);
 
-        // etiquetas simples por el momento
-        JLabel etiquetaPartido = new JLabel(enf.toString());
-        etiquetaPartido.setFont(new Font("Arial", Font.PLAIN, 14));
-        etiquetaPartido.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        // Panel contenedor de texto e iconos
+        JPanel panelPartido = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+        panelPartido.setOpaque(false);
+
+        // Participante 1
+        JLabel lblP1 = new JLabel(enf.getParticipante1().getNombre());
+        if (!(enf.getParticipante1() instanceof ParticipanteVacio)) {
+            lblP1.setIcon(obtenerIconoEscalado(enf.getParticipante1().getRutaAvatar(), 24, 24));
+        }
+
+        // Participante 2
+        JLabel lblP2 = new JLabel(enf.getParticipante2().getNombre());
+        lblP2.setHorizontalTextPosition(SwingConstants.LEFT); // El nombre a la izquierda, el ícono a la derecha
+        if (!(enf.getParticipante2() instanceof ParticipanteVacio)) {
+            lblP2.setIcon(obtenerIconoEscalado(enf.getParticipante2().getRutaAvatar(), 24, 24));
+        }
+
+        //Marcador
+        String textoCentro = " vs ";
+        if (enf.isJugado()) {
+            textoCentro = " (" + enf.getPuntaje1() + ") - (" + enf.getPuntaje2() + ") ";
+        } else if (esPaseAutomatico) {
+            textoCentro = " (Pase automático) ";
+        }
+        JLabel lblCentro = new JLabel(textoCentro);
+        lblCentro.setFont(new Font("Arial", Font.BOLD, 13));
+
+        // Juntar todo en el panel
+        panelPartido.add(lblP1);
+        panelPartido.add(lblCentro);
+        panelPartido.add(lblP2);
 
         if (esPaseAutomatico) {
             fila.setBackground(new Color(230, 230, 230));
-            etiquetaPartido.setForeground(Color.GRAY);
-            fila.add(etiquetaPartido, BorderLayout.CENTER);
+            lblP1.setForeground(Color.GRAY);
+            lblP2.setForeground(Color.GRAY);
+            lblCentro.setForeground(Color.GRAY);
+            fila.add(panelPartido, BorderLayout.CENTER);
         } else if (enf.isJugado()) {
             fila.setBackground(new Color(220, 245, 220));
-            fila.add(etiquetaPartido, BorderLayout.CENTER);
+            fila.add(panelPartido, BorderLayout.CENTER);
         } else {
             fila.setBackground(new Color(255, 250, 220));
-            JButton btnRegistrar = new JButton("Registrar resultado");
+            JButton btnRegistrar = new JButton("Registrar");
             btnRegistrar.setFont(new Font("Arial", Font.PLAIN, 11));
             btnRegistrar.addActionListener(e -> {
                 Window ventanaPadre = SwingUtilities.getWindowAncestor(this);
                 Frame frame = (ventanaPadre instanceof Frame) ? (Frame) ventanaPadre : null;
                 new DialogoRegistrarResultados(frame, enf).setVisible(true);
             });
-            fila.add(etiquetaPartido, BorderLayout.CENTER);
+            fila.add(panelPartido, BorderLayout.CENTER);
             fila.add(btnRegistrar, BorderLayout.EAST);
         }
 
         fila.setOpaque(true);
         return fila;
+    }
+
+    // Metodo para cargar imagenes
+    private ImageIcon obtenerIconoEscalado(String ruta, int width, int height) {
+        if (ruta == null || ruta.trim().isEmpty()) {
+            return null;
+        }
+        try {
+            ImageIcon iconoOriginal = new ImageIcon(ruta);
+            // Validar que la imagen realmente existe
+            if (iconoOriginal.getIconWidth() == -1) {
+                return null;
+            }
+            Image imagenEscalada = iconoOriginal.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+            return new ImageIcon(imagenEscalada);
+        } catch (Exception e) {
+            System.err.println("No se pudo cargar el avatar: " + ruta);
+            return null;
+        }
     }
 }

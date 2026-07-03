@@ -403,7 +403,7 @@ public class VentanaRegistro extends JFrame implements Observer {
             comboArchivo.addItem("reino-unido.png");
             comboArchivo.addItem("uruguay.png");
             comboArchivo.addItem("venezuela.png");
-            
+
         } else if ("Avatares".equals(categoria)) {
             comboArchivo.addItem("avatar_0.png");
 
