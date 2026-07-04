@@ -27,6 +27,9 @@ El diagrama UML se completo mediante las herramientas de git
 classDiagram
     direction TB
 
+
+    %% Logica
+
     class Observer {
         <<interface>>
         +actualizar() void
@@ -64,13 +67,16 @@ classDiagram
         -id: String
         -nombre: String
         -contacto: String
+        -rutaAvatar: String
         +Participante(id: String, nombre: String, contacto: String)
         +getId() String
         +getNombre() String
         +getContacto() String
+        +getRutaAvatar() String
         +getTipo()* String
         +setNombre(nombre: String) void
         +setContacto(contacto: String) void
+        +setRutaAvatar(ruta: String) void
         +toString() String
     }
 
@@ -80,7 +86,9 @@ classDiagram
     }
 
     class Equipo {
+        -miembros: List~String~
         +Equipo(id: String, nombre: String, contacto: String)
+        +agregarMiembro(miembro: String) void
         +getTipo() String
     }
 
@@ -98,12 +106,18 @@ classDiagram
         -participante2: Participante
         -ronda: int
         -jugado: boolean
+        -puntaje1: float
+        -puntaje2: float
         +Enfrentamiento(p1: Participante, p2: Participante)
         +Enfrentamiento(p1: Participante, p2: Participante, ronda: int)
         +getRonda() int
         +isJugado() boolean
+        +setJugado(estado: boolean) void
         +getParticipante1() Participante
         +getParticipante2() Participante
+        +getPuntaje1() float
+        +getPuntaje2() float
+        +registrarResultado(puntos1: float, puntos2: float) void
         +getGanador() Participante
     }
 
@@ -126,7 +140,45 @@ classDiagram
         ELIMINATORIA_DOBLE
     }
 
-    %% Relaciones de Asociación y Composición
+    %% gui 
+
+    class Main {
+        +main(args: String[]) void$
+    }
+
+    class VentanaRegistro {
+        +VentanaRegistro()
+        +actualizar() void
+    }
+
+    class PanelTablaTorneo {
+        +PanelTablaTorneo()
+        +actualizar() void
+        -crearFilaEnfrentamiento(enf: Enfrentamiento) JPanel
+    }
+
+    class PanelCalendario {
+        +PanelCalendario()
+        +actualizar() void
+    }
+
+    class DialogoRegistrarResultados {
+        +DialogoRegistrarResultados(padre: Frame, enf: Enfrentamiento)
+    }
+
+    class DialogoEditarEnfrentamiento {
+        +DialogoEditarEnfrentamiento(padre: Frame, enf: Enfrentamiento)
+    }
+
+    class VentanaGestionInscritos {
+        +VentanaGestionInscritos(padre: JFrame)
+    }
+
+
+    %% relaciones
+
+
+    %% Relaciones Lógica
     GestorTorneo o-- Observer : -observadores 
     GestorTorneo o-- Participante : -Inscritos 
     GestorTorneo o-- Enfrentamiento : -enfrentamientos
@@ -137,12 +189,27 @@ classDiagram
     Enfrentamiento --> Participante : -participante1
     Enfrentamiento --> Participante : -participante2
 
-    %% Relaciones de Herencia e Implementación
     Participante <|-- Jugador
     Participante <|-- Equipo
     Participante <|-- ParticipanteVacio
 
-    %% Relaciones de Dependencia (Uso)
     ParticipanteFactory ..> Participante : crea
     ParticipanteFactory ..> Jugador : instancía
     ParticipanteFactory ..> Equipo : instancía
+
+    %% Relaciones GUI e Implementaciones
+    Observer <|.. VentanaRegistro
+    Observer <|.. PanelTablaTorneo
+    Observer <|.. PanelCalendario
+
+    Main ..> VentanaRegistro : Inicia
+
+    VentanaRegistro ..> GestorTorneo : Uso
+    PanelTablaTorneo ..> GestorTorneo : Uso
+    PanelCalendario ..> GestorTorneo : Uso
+
+    VentanaRegistro ..> ParticipanteFactory : Uso
+    VentanaRegistro ..> VentanaGestionInscritos : Abre
+    
+    PanelTablaTorneo ..> DialogoRegistrarResultados : Abre
+    PanelTablaTorneo ..> DialogoEditarEnfrentamiento : Abre
