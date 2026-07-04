@@ -343,7 +343,7 @@ public class GestorTorneo {
     }
     /**
      * Asigna horarios dinamicos y reparte los partidos en 3 canchas/recintos diferentes.
-     * Añade 1 hora y 30 minutos de diferencia entre cada bloque de partidos.
+     * Añade la hora que pida el usuario de diferencia entre cada bloque de partidos.
      */
     private void asignarHorariosAutomaticos() {
         int horaBase = this.horaInicio;
@@ -352,23 +352,23 @@ public class GestorTorneo {
         int contadorCancha = 1;
 
         for (Enfrentamiento e : enfrentamientos) {
-            // Solo asignamos horario a los de la ronda actual y que no sean Byes (Pase automático)
+            //solo asignamos horario a los de la ronda actual (Pase auto)
             if (e.getRonda() == this.rondaActual &&
                     !(e.getParticipante1() instanceof ParticipanteVacio) &&
                     !(e.getParticipante2() instanceof ParticipanteVacio)) {
 
-                // Formateamos la hora para que se vea bien (Ej: 09:30 HRS)
+                //formateamos la hora para que se vea bien
                 String horaTexto = String.format("%02d:%02d HRS", horaBase, minutoBase);
                 e.setHora(horaTexto);
                 e.setRecinto("Cancha " + contadorCancha);
 
                 contadorCancha++;
 
-                // Si ya ocupamos las 3 canchas en este bloque horario, avanzamos el reloj 1.5 hrs
-                // Si ya ocupamos las canchas en este bloque, avanzamos el reloj dinámicamente
+                //si ya ocupamos las 3 canchas en este bloque horario, avanzamos el reloj
+                //si ya ocupamos las canchas en este bloque, avanzamos el reloj de nuevo
                 if (contadorCancha > maxCanchas) {
                     contadorCancha = 1;
-                    minutoBase += this.intervaloMinutos; // Usamos la variable que definiste
+                    minutoBase += this.intervaloMinutos;
 
                     //ussamos un while por si el partido dura 120 mins o mas
                     while (minutoBase >= 60) {
@@ -384,7 +384,7 @@ public class GestorTorneo {
             }
         }
     }
-    // Getters
+    //Getters
 
     public String getNombre() { return nombre; }
     public Disciplina getDisciplina() { return disciplina; }
