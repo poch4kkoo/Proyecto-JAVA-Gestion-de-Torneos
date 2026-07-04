@@ -115,8 +115,6 @@ public class GestorTorneo {
         //Si pierde una vez baja a la llave de perdedores, si no pierde queda en la llave de ganadores.
         //Solo se tiene la logica para la primera ronda.
         else if (formato == FormatoTorneo.ELIMINATORIA_DOBLE) {
-
-            // Cambia el tamaño de la tabla segun cuantos participantes sean
             if (Inscritos.size() > 0) {
                 int proximaPotencia = 1;
                 while (proximaPotencia < Inscritos.size()) {
@@ -126,15 +124,14 @@ public class GestorTorneo {
                 int cantidadByes = proximaPotencia - Inscritos.size();
                 int indiceActual = 0;
 
-                // Emparejamos a los participantes con un bye
+                // Participantes contra un Bye
                 for (int i = 0; i < cantidadByes; i++) {
-                    enfrentamientos.add(new Enfrentamiento(Inscritos.get(indiceActual), new ParticipanteVacio()));
+                    enfrentamientos.add(new Enfrentamiento(Inscritos.get(indiceActual), new ParticipanteVacio(), 1, "Ganadores"));
                     indiceActual++;
                 }
-
-                // Emparejamos a los demas participantes
+                //  enfrentamiento de resto de participantes
                 while (indiceActual < Inscritos.size()) {
-                    enfrentamientos.add(new Enfrentamiento(Inscritos.get(indiceActual), Inscritos.get(indiceActual + 1)));
+                    enfrentamientos.add(new Enfrentamiento(Inscritos.get(indiceActual), Inscritos.get(indiceActual + 1), 1, "Ganadores"));
                     indiceActual += 2;
                 }
             }
@@ -163,33 +160,137 @@ public class GestorTorneo {
      *
      */
     public void avanzarRonda() {
-
-        List<Participante> clasificados = new ArrayList<>();
-
-        // Añade a los ganadores a la lista de clasificados
-        for (Enfrentamiento e : enfrentamientos) {
-            if (e.getRonda() == this.rondaActual) {
-                Participante ganador = e.getGanador();
-                if (ganador != null) {
-                    clasificados.add(ganador);
-                }
-            }
+        // La logica de la liga ocurre en una sola ronda
+        if (formato == FormatoTorneo.LIGA_SIMPLE) {
+            return;
         }
 
-        // Comprueba si alguien gano el torneo
-        if (clasificados.size() == 1) {
-            System.out.println("Ganador del Torneo: " + clasificados.get(0).getNombre());
+        // Logica eliminatoria directa
+        if (formato == FormatoTorneo.ELIMINATORIA_DIRECTA) {
+            List<Participante> clasificados = new ArrayList<>();
+            for (Enfrentamiento e : enfrentamientos) {
+                if (e.getRonda() == this.rondaActual && e.getGanador() != null) {
+                    clasificados.add(e.getGanador());
+                }
+            }
+            if (clasificados.size() == 1) {
+                System.out.println("Ganador del Torneo: " + clasificados.get(0).getNombre());
+                notificar();
+                return;
+            }
+            this.rondaActual++;
+            for (int i = 0; i < clasificados.size(); i += 2) {
+                enfrentamientos.add(new Enfrentamiento(clasificados.get(i), clasificados.get(i + 1), this.rondaActual));
+            }
             notificar();
             return;
         }
 
-        // Genera los enfrentamientos de esta ronda
-        this.rondaActual++;
-        for (int i = 0; i < clasificados.size(); i += 2) {
-            enfrentamientos.add(new Enfrentamiento(clasificados.get(i), clasificados.get(i + 1), this.rondaActual));
-        }
+        // Logica eliminatoria doble
 
-        notificar();
+        if (formato == FormatoTorneo.ELIMINATORIA_DOBLE) {
+
+            List<Enfrentamiento> wb = new ArrayList<>();    // llave de ganadores
+            List<Enfrentamiento> lb = new ArrayList<>();    // llave perdedores
+            List<Enfrentamiento> gf = new ArrayList<>();    // guardara a los finalistas
+
+            // Separamos las llaves de la ronda actual
+            for (Enfrentamiento e : enfrentamientos) {
+                if (e.getRonda() == this.rondaActual) {
+                    if (e.getLlave().equals("Ganadores")) wb.add(e);
+                    else if (e.getLlave().equals("Perdedores")) lb.add(e);
+                    else if (e.getLlave().equals("Gran Final")) gf.add(e);
+                }
+            }
+
+            this.rondaActual++;
+
+            // Control de la Gran Final
+            if (!gf.isEmpty()) {
+                Enfrentamiento finalAnterior = gf.get(0);
+                Participante ganadorFinal = finalAnterior.getGanador();
+
+                // El que venia del bracket de ganadores debe perder 2 veces para ser derrotado
+                if (ganadorFinal == finalAnterior.getParticipante2() &&
+                        enfrentamientos.stream().noneMatch(e -> e.getLlave().equals("Gran Final") && e.getRonda() == this.rondaActual)) {
+                    enfrentamientos.add(new Enfrentamiento(finalAnterior.getParticipante1(), finalAnterior.getParticipante2(), this.rondaActual, "Gran Final"));
+                    notificar();
+                    return;
+                } else {
+                    System.out.println("Ganador Definitivo del Torneo: " + ganadorFinal.getNombre());
+                    notificar();
+                    return;
+                }
+            }
+
+            // Nuevas listas para los resultados de los partidos concluidos
+            List<Participante> ganadoresWB = new ArrayList<>();
+            List<Participante> perdedoresWB = new ArrayList<>();
+            List<Participante> ganadoresLB = new ArrayList<>();
+
+            for (Enfrentamiento e : wb) {
+                if (e.getGanador() != null) {
+                    ganadoresWB.add(e.getGanador());
+                    perdedoresWB.add(e.getGanador() == e.getParticipante1() ? e.getParticipante2() : e.getParticipante1());
+                }
+            }
+            for (Enfrentamiento e : lb) {
+                if (e.getGanador() != null && !(e.getGanador() instanceof ParticipanteVacio)) {
+                    ganadoresLB.add(e.getGanador());
+                }
+            }
+
+            // Caso 1: Quedan partidos en la wb
+            if (wb.size() > 1) {
+                for (int i = 0; i < ganadoresWB.size(); i += 2) {
+                    enfrentamientos.add(new Enfrentamiento(ganadoresWB.get(i), ganadoresWB.get(i + 1), this.rondaActual, "Ganadores"));
+                }
+                if (lb.isEmpty()) {
+                    for (int i = 0; i < perdedoresWB.size(); i += 2) {
+                        enfrentamientos.add(new Enfrentamiento(perdedoresWB.get(i), perdedoresWB.get(i + 1), this.rondaActual, "Perdedores"));
+                    }
+                }
+            }
+            // Caso 2: Acaba de terminar la wb
+            else if (wb.size() == 1) {
+                if (!ganadoresLB.isEmpty()) {
+                    for (int i = 0; i < ganadoresLB.size(); i++) {
+                        enfrentamientos.add(new Enfrentamiento(ganadoresLB.get(i), perdedoresWB.get(i), this.rondaActual, "Perdedores"));
+                    }
+                }
+            }
+            // Caso 3: el ganador de la wb esta esperando en gf, solo la de perdedores sigue activa
+            else if (wb.isEmpty() && !lb.isEmpty()) {
+                if (ganadoresLB.size() > 1) {
+                    for (int i = 0; i < ganadoresLB.size(); i += 2) {
+                        enfrentamientos.add(new Enfrentamiento(ganadoresLB.get(i), ganadoresLB.get(i + 1), this.rondaActual, "Perdedores"));
+                    }
+                }
+                else if (ganadoresLB.size() == 1) {
+                    Enfrentamiento finalGanadores = enfrentamientos.stream()
+                            .filter(e -> e.getLlave().equals("Ganadores"))
+                            .reduce((first, second) -> second).orElse(null);
+
+                    if (finalGanadores != null) {
+                        Participante invicto = finalGanadores.getGanador();
+                        Participante perdedorFinalGanadores = finalGanadores.getGanador() == finalGanadores.getParticipante1() ? finalGanadores.getParticipante2() : finalGanadores.getParticipante1();
+
+                        // Verificamos si el perdedor de la final de ganadores ya jugó en la llave de perdedores
+                        boolean yaJugoEnPerdedores = enfrentamientos.stream()
+                                .anyMatch(e -> e.getLlave().equals("Perdedores") && (e.getParticipante1() == perdedorFinalGanadores || e.getParticipante2() == perdedorFinalGanadores));
+
+                        if (!yaJugoEnPerdedores) {
+                            // Final de la Llave de Perdedores
+                            enfrentamientos.add(new Enfrentamiento(ganadoresLB.get(0), perdedorFinalGanadores, this.rondaActual, "Perdedores"));
+                        } else {
+                            // Final entre ambas llaves
+                            enfrentamientos.add(new Enfrentamiento(invicto, ganadoresLB.get(0), this.rondaActual, "Gran Final"));
+                        }
+                    }
+                }
+            }
+            notificar();
+        }
     }
 
     // Getters

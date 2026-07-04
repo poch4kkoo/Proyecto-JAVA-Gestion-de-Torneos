@@ -7,24 +7,28 @@ public class Enfrentamiento {
     private float puntaje2;
     private boolean jugado;
     private int ronda;
+    private int fecha;
+    private String llave;
 
+    // Constructor para llamada con 2 atributos
     public Enfrentamiento(Participante participante1, Participante participante2) {
-        this.participante1 = participante1;
-        this.participante2 = participante2;
-        puntaje1 = 0;
-        puntaje2 = 0;
-        jugado = false;
-        this.ronda = 1;
-
+        this(participante1, participante2, 1, "Ganadores");
     }
 
+    // Constructor para agregar ronda
     public Enfrentamiento(Participante participante1, Participante participante2, int ronda) {
+        this(participante1, participante2, ronda, "Ganadores");
+    }
+
+    // Constructor Principal
+    public Enfrentamiento(Participante participante1, Participante participante2, int ronda, String llave) {
         this.participante1 = participante1;
         this.participante2 = participante2;
-        puntaje1 = 0;
-        puntaje2 = 0;
-        jugado = false;
         this.ronda = ronda;
+        this.llave = llave;
+        this.puntaje1 = 0;
+        this.puntaje2 = 0;
+        this.jugado = false;
     }
 
     public void registrarResultado(float puntaje1, float puntaje2) {
@@ -83,9 +87,12 @@ public class Enfrentamiento {
 
     public int getRonda() { return ronda; }
 
+    public String getLlave() { return llave; }
+
     private String puntajeResultados() {
         return jugado ? String.valueOf(puntaje2) : "-";
     }
+
 
     @Override
     public String toString() {
