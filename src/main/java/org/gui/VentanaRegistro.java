@@ -327,6 +327,9 @@ public class VentanaRegistro extends JFrame implements Observer {
         // Pestaña de tabla del torneo
         pestanas.addTab(" Tabla Torneo", panelVisualLlaves);
 
+        // Pestaña calendario
+        pestanas.addTab("Calendario", new PanelCalendario());
+
         add(pestanas, BorderLayout.CENTER);
     }
 
