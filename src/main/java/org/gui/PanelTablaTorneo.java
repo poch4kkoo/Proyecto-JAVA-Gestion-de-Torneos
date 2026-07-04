@@ -147,13 +147,16 @@ public class PanelTablaTorneo extends JPanel implements org.logica.Observer {
         scrollTabla.setAlignmentX(Component.CENTER_ALIGNMENT);
         panelArbol.add(scrollTabla);
 
-        JLabel lblPartidos = new JLabel("  Partidos");
+        JLabel lblPartidos = new JLabel(" Partidos");
         lblPartidos.setFont(new Font("Arial", Font.BOLD, 13));
         lblPartidos.setBorder(BorderFactory.createEmptyBorder(12, 10, 4, 10));
+        lblPartidos.setAlignmentX(Component.CENTER_ALIGNMENT);
         panelArbol.add(lblPartidos);
 
         for (Enfrentamiento enf : gestor.getEnfrentamientos()) {
-            panelArbol.add(crearFilaEnfrentamiento(enf));
+            JPanel filaPartido = crearFilaEnfrentamiento(enf);
+            filaPartido.setAlignmentX(Component.CENTER_ALIGNMENT);
+            panelArbol.add(filaPartido);
         }
     }
 
@@ -198,6 +201,7 @@ public class PanelTablaTorneo extends JPanel implements org.logica.Observer {
         fila.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
 
         boolean esPaseAutomatico = (enf.getParticipante1() instanceof ParticipanteVacio || enf.getParticipante2() instanceof ParticipanteVacio);
+        boolean esEliminatoria = GestorTorneo.getInstancia().getFormato() != FormatoTorneo.LIGA_SIMPLE;
 
         // Panel contenedor de texto e iconos
         JPanel panelPartido = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
@@ -231,17 +235,24 @@ public class PanelTablaTorneo extends JPanel implements org.logica.Observer {
         panelPartido.add(lblCentro);
         panelPartido.add(lblP2);
 
-        if (esPaseAutomatico) {
-            fila.setBackground(new Color(230, 230, 230));
-            lblP1.setForeground(Color.GRAY);
-            lblP2.setForeground(Color.GRAY);
-            lblCentro.setForeground(Color.GRAY);
-            fila.add(panelPartido, BorderLayout.CENTER);
-        } else if (enf.isJugado()) {
-            fila.setBackground(new Color(220, 245, 220));
-            fila.add(panelPartido, BorderLayout.CENTER);
-        } else {
-            fila.setBackground(new Color(255, 250, 220));
+        // Botones para editar enfrentamientos
+        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
+        panelBotones.setOpaque(false);
+
+        // Botón "Editar": Solo aparece si es eliminatoria, es la Ronda 1 y no se ha jugado aún
+        if (esEliminatoria && enf.getRonda() == 1 && !enf.isJugado()) {
+            JButton btnEditar = new JButton("Editar");
+            btnEditar.setFont(new Font("Arial", Font.PLAIN, 11));
+            btnEditar.addActionListener(e -> {
+                Window ventanaPadre = SwingUtilities.getWindowAncestor(this);
+                Frame frame = (ventanaPadre instanceof Frame) ? (Frame) ventanaPadre : null;
+                new DialogoEditarEnfrentamiento(frame, enf).setVisible(true);
+            });
+            panelBotones.add(btnEditar);
+        }
+
+        // Botón "Registrar"
+        if (!enf.isJugado() && !esPaseAutomatico) {
             JButton btnRegistrar = new JButton("Registrar");
             btnRegistrar.setFont(new Font("Arial", Font.PLAIN, 11));
             btnRegistrar.addActionListener(e -> {
@@ -249,8 +260,24 @@ public class PanelTablaTorneo extends JPanel implements org.logica.Observer {
                 Frame frame = (ventanaPadre instanceof Frame) ? (Frame) ventanaPadre : null;
                 new DialogoRegistrarResultados(frame, enf).setVisible(true);
             });
-            fila.add(panelPartido, BorderLayout.CENTER);
-            fila.add(btnRegistrar, BorderLayout.EAST);
+            panelBotones.add(btnRegistrar);
+        }
+
+        // Aspecto visual de las filas
+        if (esPaseAutomatico) {
+            fila.setBackground(new Color(230, 230, 230));
+            lblP1.setForeground(Color.GRAY);
+            lblP2.setForeground(Color.GRAY);
+            lblCentro.setForeground(Color.GRAY);
+        } else if (enf.isJugado()) {
+            fila.setBackground(new Color(220, 245, 220));
+        } else {
+            fila.setBackground(new Color(255, 250, 220));
+        }
+
+        fila.add(panelPartido, BorderLayout.CENTER);
+        if (panelBotones.getComponentCount() > 0) {
+            fila.add(panelBotones, BorderLayout.EAST);
         }
 
         fila.setOpaque(true);

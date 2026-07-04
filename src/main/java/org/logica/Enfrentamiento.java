@@ -31,6 +31,9 @@ public class Enfrentamiento {
         this.jugado = false;
     }
 
+    public void setParticipante1(Participante p) { this.participante1 = p; }
+    public void setParticipante2(Participante p) { this.participante2 = p; }
+
     public void registrarResultado(float puntaje1, float puntaje2) {
         Disciplina disciplinaActual = GestorTorneo.getInstancia().getDisciplina();
         if (!disciplinaActual.esValido(puntaje1, puntaje2)) {

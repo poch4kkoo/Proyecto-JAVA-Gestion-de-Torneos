@@ -67,6 +67,34 @@ public class GestorTorneo {
         notificar();
     }
 
+
+    // metodo para editar enfrentamientos
+    public void intercambiarParticipantes(Participante p1, Participante p2) {
+        if (p1 == p2 || this.rondaActual != 1) return; // Protección
+
+        Enfrentamiento enf1 = null, enf2 = null;
+        boolean p1EsLocal = true, p2EsLocal = true;
+
+        // Buscar enfrentamientos actuales
+        for (Enfrentamiento e : enfrentamientos) {
+            if (e.getRonda() == 1) {
+                if (e.getParticipante1() == p1) { enf1 = e; p1EsLocal = true; }
+                else if (e.getParticipante2() == p1) { enf1 = e; p1EsLocal = false; }
+
+                if (e.getParticipante1() == p2) { enf2 = e; p2EsLocal = true; }
+                else if (e.getParticipante2() == p2) { enf2 = e; p2EsLocal = false; }
+            }
+        }
+
+        // Si encontramos a ambos, invertimos sus posiciones
+        if (enf1 != null && enf2 != null) {
+            if (p1EsLocal) enf1.setParticipante1(p2); else enf1.setParticipante2(p2);
+            if (p2EsLocal) enf2.setParticipante1(p1); else enf2.setParticipante2(p1);
+            notificar(); 
+        }
+    }
+
+
     public void generarTorneo() {
         this.enfrentamientos.clear();
         this.rondaActual = 1;
