@@ -7,7 +7,8 @@ public class Enfrentamiento {
     private float puntaje2;
     private boolean jugado;
     private int ronda;
-    private int fecha;
+    private String fecha;
+    private String hora;
     private String llave;
 
     // Constructor para llamada con 2 atributos
@@ -29,7 +30,13 @@ public class Enfrentamiento {
         this.puntaje1 = 0;
         this.puntaje2 = 0;
         this.jugado = false;
+        this.fecha = "JORNADA " + ronda;
+        this.hora = "11:00 HRS";
     }
+
+
+    public void setFecha(String fecha) { this.fecha = fecha; }
+    public void setHora(String hora) { this.hora = hora; }
 
     public void setParticipante1(Participante p) { this.participante1 = p; }
     public void setParticipante2(Participante p) { this.participante2 = p; }
@@ -91,6 +98,10 @@ public class Enfrentamiento {
     public int getRonda() { return ronda; }
 
     public String getLlave() { return llave; }
+
+    public String getFecha() { return fecha; }
+
+    public String getHora() { return hora; }
 
     private String puntajeResultados() {
         return jugado ? String.valueOf(puntaje2) : "-";

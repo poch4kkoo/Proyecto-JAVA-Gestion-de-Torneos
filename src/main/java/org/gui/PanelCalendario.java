@@ -34,9 +34,119 @@ public class PanelCalendario extends JPanel implements org.logica.Observer {
 
     @Override
     public void actualizar() {
+        panelContenedor.removeAll();
+        List<Enfrentamiento> partidos = GestorTorneo.getInstancia().getEnfrentamientos();
+
+        if (partidos.isEmpty()) {
+            JPanel pnlVacio = new JPanel(new FlowLayout(FlowLayout.CENTER));
+            pnlVacio.setBackground(Color.WHITE);
+            pnlVacio.add(new JLabel("Aún no hay enfrentamientos. Genera la tabla del torneo primero."));
+            panelContenedor.add(pnlVacio);
+        } else {
+            // Agrupar los partidos segun su fecha
+            Map<String, List<Enfrentamiento>> porFecha = new LinkedHashMap<>();
+            for (Enfrentamiento enf : partidos) {
+                porFecha.computeIfAbsent(enf.getFecha(), k -> new ArrayList<>()).add(enf);
+            }
+
+            int contadorPartido = 1;
+
+            // interfaz gráfica
+            for (Map.Entry<String, List<Enfrentamiento>> entrada : porFecha.entrySet()) {
+
+                // Barra para dia
+                JPanel headerDia = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+                headerDia.setBackground(new Color(41, 128, 185)); // Color
+                headerDia.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+
+                JLabel lblDia = new JLabel("Calendario " + entrada.getKey());
+                lblDia.setForeground(Color.WHITE);
+                lblDia.setFont(new Font("Arial", Font.BOLD, 13));
+                headerDia.add(lblDia);
+
+                panelContenedor.add(headerDia);
+
+                // Filas para los partidos del día
+                for (Enfrentamiento enf : entrada.getValue()) {
+                    panelContenedor.add(crearFilaPartido(enf, contadorPartido));
+                    contadorPartido++;
+                }
+
+                // Espacio antes del siguiente día
+                panelContenedor.add(Box.createVerticalStrut(15));
+            }
+        }
+
         panelContenedor.revalidate();
         panelContenedor.repaint();
     }
 
+    private JPanel crearFilaPartido(Enfrentamiento enf, int numero) {
+        JPanel fila = new JPanel(new BorderLayout(5, 0));
+        fila.setBackground(Color.WHITE);
+        fila.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(220, 220, 220)),
+                BorderFactory.createEmptyBorder(8, 10, 8, 10) // Margenes
+        ));
+        fila.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
 
+        // Llaves
+        JPanel pnlIzq = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        pnlIzq.setOpaque(false);
+
+        JLabel lblNum = new JLabel(" " + numero + " ", SwingConstants.CENTER);
+        lblNum.setOpaque(true);
+        lblNum.setBackground(new Color(39, 174, 96)); // Verde
+        lblNum.setForeground(Color.WHITE);
+        lblNum.setFont(new Font("Arial", Font.BOLD, 12));
+
+        pnlIzq.add(lblNum);
+
+        // Banderas y Nombres
+        JPanel pnlCentro = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
+        pnlCentro.setOpaque(false);
+
+        JLabel lblP1 = new JLabel(enf.getParticipante1().getNombre());
+        lblP1.setIcon(obtenerIconoEscalado(enf.getParticipante1().getRutaAvatar(), 20, 20));
+        lblP1.setHorizontalTextPosition(SwingConstants.LEFT); // Nombre a la izquierda de la bandera
+
+        JLabel lblVs = new JLabel("VS");
+        lblVs.setFont(new Font("Arial", Font.BOLD, 10));
+        lblVs.setForeground(Color.GRAY);
+
+        JLabel lblP2 = new JLabel(enf.getParticipante2().getNombre());
+        lblP2.setIcon(obtenerIconoEscalado(enf.getParticipante2().getRutaAvatar(), 20, 20));
+
+        pnlCentro.add(lblP1);
+        pnlCentro.add(lblVs);
+        pnlCentro.add(lblP2);
+
+        // Hora del partido a la derecha
+        JPanel pnlDer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        pnlDer.setOpaque(false);
+
+        JLabel lblHora = new JLabel(enf.getHora());
+        lblHora.setFont(new Font("Arial", Font.BOLD, 12));
+        lblHora.setForeground(new Color(39, 174, 96));
+        pnlDer.add(lblHora);
+
+        // Paneles
+        fila.add(pnlIzq, BorderLayout.WEST);
+        fila.add(pnlCentro, BorderLayout.CENTER);
+        fila.add(pnlDer, BorderLayout.EAST);
+
+        return fila;
+    }
+
+    private ImageIcon obtenerIconoEscalado(String ruta, int width, int height) {
+        if (ruta == null || ruta.trim().isEmpty()) return null;
+        try {
+            ImageIcon iconoOriginal = new ImageIcon(ruta);
+            if (iconoOriginal.getIconWidth() == -1) return null;
+            Image imagenEscalada = iconoOriginal.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+            return new ImageIcon(imagenEscalada);
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }

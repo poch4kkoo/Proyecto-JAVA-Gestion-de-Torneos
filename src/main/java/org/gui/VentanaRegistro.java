@@ -34,7 +34,7 @@ public class VentanaRegistro extends JFrame implements Observer {
 
     public VentanaRegistro() {
         setTitle("Sistema de Gestión de Torneos - Registro");
-        setSize(600, 400);
+        setSize(600, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
