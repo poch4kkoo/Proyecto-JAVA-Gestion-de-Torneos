@@ -10,6 +10,10 @@ public class VentanaRegistro extends JFrame implements Observer {
     private JComboBox<FormatoTorneo> comboFormato;
     private JTextField txtNombreTorneo;
     private JButton btnConfigurar;
+    private JSpinner spinHora;
+    private JSpinner spinMinuto;
+    private JSpinner spinCanchas;
+    private JSpinner spinIntervalo;
 
     private JComboBox<String> comboTipoParticipante;
     private JTextField txtNombreParticipante;
@@ -42,21 +46,43 @@ public class VentanaRegistro extends JFrame implements Observer {
         GestorTorneo.getInstancia().registrarObserver(this);
 
         //panel superior: configurar el torneo
-        JPanel panelNorte=new JPanel(new GridLayout(2, 4, 5, 5));
+        JPanel panelNorte = new JPanel(new GridLayout(4, 4, 5, 5)); // Cambiamos a 3 filas
         panelNorte.setBorder(BorderFactory.createTitledBorder("1. Definir Características del Torneo"));
 
-        txtNombreTorneo=new JTextField();
-        comboDisciplina=new JComboBox<>(Disciplina.values());
-        comboFormato=new JComboBox<>(FormatoTorneo.values());
-        btnConfigurar=new JButton("Crear Torneo");
+        txtNombreTorneo = new JTextField();
+        comboDisciplina = new JComboBox<>(Disciplina.values());
+        comboFormato = new JComboBox<>(FormatoTorneo.values());
+        btnConfigurar = new JButton("Crear Torneo");
 
+        //configuramos los selectores de numeros
+        spinHora = new JSpinner(new SpinnerNumberModel(9, 0, 23, 1)); //0 a 23 hrs
+        spinMinuto = new JSpinner(new SpinnerNumberModel(0, 0, 59, 15)); //de 15 en 15 mins
+        spinCanchas = new JSpinner(new SpinnerNumberModel(3, 1, 50, 1)); //1 cancha min
+        spinIntervalo = new JSpinner(new SpinnerNumberModel(60, 15, 300, 15));//tiempo dsps de cada partido
+
+        // Fila 1
         panelNorte.add(new JLabel("Nombre:"));
         panelNorte.add(txtNombreTorneo);
         panelNorte.add(new JLabel("Disciplina:"));
         panelNorte.add(comboDisciplina);
+
+        // Fila 2
         panelNorte.add(new JLabel("Formato:"));
         panelNorte.add(comboFormato);
-        panelNorte.add(new JLabel("")); //rspacio
+        panelNorte.add(new JLabel("N° Canchas/Mesas:"));
+        panelNorte.add(spinCanchas);
+        panelNorte.add(new JLabel("Duración partido (min):"));
+        panelNorte.add(spinIntervalo);
+
+        // Fila 3
+        JPanel panelTiempo = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        panelTiempo.add(spinHora);
+        panelTiempo.add(new JLabel(" : "));
+        panelTiempo.add(spinMinuto);
+
+        panelNorte.add(new JLabel("Hora Inicio:"));
+        panelNorte.add(panelTiempo);
+        panelNorte.add(new JLabel("")); // Espacio vacío para rellenar la grilla
         panelNorte.add(btnConfigurar);
 
         //panel central: inscribir participantes
@@ -227,22 +253,32 @@ public class VentanaRegistro extends JFrame implements Observer {
         //eventos de los botones
         //evento Configurar Torneo
         btnConfigurar.addActionListener((ActionEvent e) -> {
-            String nombre=txtNombreTorneo.getText();
+            String nombre = txtNombreTorneo.getText();
             Disciplina dis = (Disciplina) comboDisciplina.getSelectedItem();
             FormatoTorneo form = (FormatoTorneo) comboFormato.getSelectedItem();
 
+            //capturamos los datos nuevos
+            int canchas = (int) spinCanchas.getValue();
+            int hora = (int) spinHora.getValue();
+            int min = (int) spinMinuto.getValue();
+            int intervalo = (int) spinIntervalo.getValue();
 
             if(nombre.trim().isEmpty() || dis == null || form == null) {
                 JOptionPane.showMessageDialog(this, "Complete todos los campos del torneo");
                 return ;
             }
 
-            GestorTorneo.getInstancia().configurarTorneo(nombre, dis, form);
+            //  mandamos los nuevos datos al gestor
+            GestorTorneo.getInstancia().configurarTorneo(nombre, dis, form, hora, min, canchas, intervalo);
 
             txtNombreTorneo.setEnabled(false);
             comboDisciplina.setEnabled(false);
             comboFormato.setEnabled(false);
+            spinHora.setEnabled(false); //bloqueamos los campos nuevos
+            spinMinuto.setEnabled(false);
+            spinCanchas.setEnabled(false);
             btnConfigurar.setEnabled(false);
+            spinIntervalo.setEnabled(false);
 
             comboTipoParticipante.setEnabled(false);
             btnInscribir.setEnabled(true);
@@ -274,9 +310,22 @@ public class VentanaRegistro extends JFrame implements Observer {
                 }
             }
 
-            if ("Equipo".equalsIgnoreCase(tipo) && modeloMiembrosPendientes.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Agregue al menos un miembro al equipo.");
-                return;
+            if ("Equipo".equalsIgnoreCase(tipo)) {
+                Disciplina disActual = (Disciplina) comboDisciplina.getSelectedItem();
+                int cantidadMiembros = modeloMiembrosPendientes.size();
+
+                if (disActual != null) {
+                    if (cantidadMiembros < disActual.getMinimoJugadores() || cantidadMiembros > disActual.getMaximoJugadores()) {
+                        JOptionPane.showMessageDialog(this,
+                                "Error: Para " + disActual.name() + " el equipo debe tener entre " +
+                                        disActual.getMinimoJugadores() + " y " + disActual.getMaximoJugadores() + " miembros registrados.",
+                                "Limites de Equipo", JOptionPane.WARNING_MESSAGE);
+                        return;
+                    }
+                } else if (cantidadMiembros == 0) {
+                    JOptionPane.showMessageDialog(this, "Agregue al menos un miembro al equipo.");
+                    return;
+                }
             }
 
             String idRandom = "ID-" + nombrePart.toUpperCase().replaceAll("\\s+", "");

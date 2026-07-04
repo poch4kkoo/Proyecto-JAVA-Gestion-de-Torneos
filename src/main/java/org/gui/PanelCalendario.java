@@ -121,14 +121,23 @@ public class PanelCalendario extends JPanel implements org.logica.Observer {
         pnlCentro.add(lblVs);
         pnlCentro.add(lblP2);
 
-        // Hora del partido a la derecha
-        JPanel pnlDer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        // Hora y recinto a la derecha
+        JPanel pnlDer = new JPanel();
+        pnlDer.setLayout(new BoxLayout(pnlDer, BoxLayout.Y_AXIS));
         pnlDer.setOpaque(false);
 
         JLabel lblHora = new JLabel(enf.getHora());
         lblHora.setFont(new Font("Arial", Font.BOLD, 12));
         lblHora.setForeground(new Color(39, 174, 96));
+        lblHora.setAlignmentX(Component.RIGHT_ALIGNMENT);
+
+        JLabel lblRecinto = new JLabel(enf.getRecinto() != null ? enf.getRecinto() : "");
+        lblRecinto.setFont(new Font("Arial", Font.PLAIN, 10));
+        lblRecinto.setForeground(Color.GRAY);
+        lblRecinto.setAlignmentX(Component.RIGHT_ALIGNMENT);
+
         pnlDer.add(lblHora);
+        pnlDer.add(lblRecinto);
 
         // Paneles
         fila.add(pnlIzq, BorderLayout.WEST);

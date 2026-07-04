@@ -10,6 +10,7 @@ public class Enfrentamiento {
     private String fecha;
     private String hora;
     private String llave;
+    private String recinto;
 
     // Constructor para llamada con 2 atributos
     public Enfrentamiento(Participante participante1, Participante participante2) {
@@ -31,7 +32,8 @@ public class Enfrentamiento {
         this.puntaje2 = 0;
         this.jugado = false;
         this.fecha = "JORNADA " + ronda;
-        this.hora = "11:00 HRS";
+        this.hora = "Por definir ";
+        this.recinto = "Por definir"; //nuevo
     }
 
 
@@ -106,6 +108,9 @@ public class Enfrentamiento {
     private String puntajeResultados() {
         return jugado ? String.valueOf(puntaje2) : "-";
     }
+
+    public String getRecinto() { return recinto; }
+    public void setRecinto(String recinto) { this.recinto = recinto; }
 
 
     @Override
