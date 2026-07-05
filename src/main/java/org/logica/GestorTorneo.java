@@ -15,6 +15,10 @@ public class GestorTorneo {
     private List<Enfrentamiento> enfrentamientos;
     private List<Observer> observadores;
     private int rondaActual;
+    private int horaInicio = 9;//nuevos
+    private int minutoInicio = 0;//nuevos
+    private int maxCanchas = 3;//nuevos
+    private int intervaloMinutos = 60;//nuevo
 
     // El constructor es privado para seguir el patron singleton.
     private GestorTorneo() {
@@ -48,10 +52,14 @@ public class GestorTorneo {
 
     // Configuracion del torneo
 
-    public void configurarTorneo(String nombre, Disciplina disciplina, FormatoTorneo formato) {
+    public void configurarTorneo(String nombre, Disciplina disciplina, FormatoTorneo formato, int horaInicio, int minutoInicio, int maxCanchas, int intervaloMinutos) {
         this.nombre = nombre;
-        this.disciplina = disciplina;
-        this.formato = formato;
+        this.disciplina=disciplina;
+        this.formato=formato;
+        this.horaInicio=horaInicio;
+        this.minutoInicio=minutoInicio;
+        this.maxCanchas=maxCanchas;
+        this.intervaloMinutos=intervaloMinutos;
         notificar();
     }
 
@@ -164,19 +172,27 @@ public class GestorTorneo {
                 }
             }
         }
-
+        asignarHorariosAutomaticos();
         notificar();
     }
 
 
     public boolean rondaActualTerminada() {
         for (Enfrentamiento e : enfrentamientos) {
-            if (e.getRonda() == this.rondaActual && !e.isJugado()) {
-                // avanza de ronda si no hay rival.
-                if (e.getParticipante1() instanceof ParticipanteVacio || e.getParticipante2() instanceof ParticipanteVacio) {
-                    continue;
+            if (e.getRonda() == this.rondaActual) {
+                if (!e.isJugado()) {
+                    // Avanza de ronda si no hay rival
+                    if (e.getParticipante1() instanceof ParticipanteVacio || e.getParticipante2() instanceof ParticipanteVacio) {
+                        continue;
+                    }
+                    return false; //hay partidos pendientes
                 }
-                return false; // Hay partidos pendientes
+
+                //regla nueva: si es eliminatoria y hay empate, bloqueamos el avance
+                if (formato != FormatoTorneo.LIGA_SIMPLE && e.getGanador() == null) {
+                    System.out.println("No se puede avanzar: Hay un partido empatado que requiere definición.");
+                    return false;
+                }
             }
         }
         return true;
@@ -203,6 +219,7 @@ public class GestorTorneo {
             }
             if (clasificados.size() == 1) {
                 System.out.println("Ganador del Torneo: " + clasificados.get(0).getNombre());
+                asignarHorariosAutomaticos();
                 notificar();
                 return;
             }
@@ -210,6 +227,7 @@ public class GestorTorneo {
             for (int i = 0; i < clasificados.size(); i += 2) {
                 enfrentamientos.add(new Enfrentamiento(clasificados.get(i), clasificados.get(i + 1), this.rondaActual));
             }
+            asignarHorariosAutomaticos();
             notificar();
             return;
         }
@@ -242,10 +260,12 @@ public class GestorTorneo {
                 if (ganadorFinal == finalAnterior.getParticipante2() &&
                         enfrentamientos.stream().noneMatch(e -> e.getLlave().equals("Gran Final") && e.getRonda() == this.rondaActual)) {
                     enfrentamientos.add(new Enfrentamiento(finalAnterior.getParticipante1(), finalAnterior.getParticipante2(), this.rondaActual, "Gran Final"));
+                    asignarHorariosAutomaticos();
                     notificar();
                     return;
                 } else {
                     System.out.println("Ganador Definitivo del Torneo: " + ganadorFinal.getNombre());
+                    asignarHorariosAutomaticos();
                     notificar();
                     return;
                 }
@@ -317,11 +337,54 @@ public class GestorTorneo {
                     }
                 }
             }
+            asignarHorariosAutomaticos();
             notificar();
         }
     }
+    /**
+     * Asigna horarios dinamicos y reparte los partidos en 3 canchas/recintos diferentes.
+     * Añade la hora que pida el usuario de diferencia entre cada bloque de partidos.
+     */
+    private void asignarHorariosAutomaticos() {
+        int horaBase = this.horaInicio;
+        int minutoBase = this.minutoInicio;
+        int maxCanchas = this.maxCanchas;
+        int contadorCancha = 1;
 
-    // Getters
+        for (Enfrentamiento e : enfrentamientos) {
+            //solo asignamos horario a los de la ronda actual (Pase auto)
+            if (e.getRonda() == this.rondaActual &&
+                    !(e.getParticipante1() instanceof ParticipanteVacio) &&
+                    !(e.getParticipante2() instanceof ParticipanteVacio)) {
+
+                //formateamos la hora para que se vea bien
+                String horaTexto = String.format("%02d:%02d HRS", horaBase, minutoBase);
+                e.setHora(horaTexto);
+                e.setRecinto("Cancha " + contadorCancha);
+
+                contadorCancha++;
+
+                //si ya ocupamos las 3 canchas en este bloque horario, avanzamos el reloj
+                //si ya ocupamos las canchas en este bloque, avanzamos el reloj de nuevo
+                if (contadorCancha > maxCanchas) {
+                    contadorCancha = 1;
+                    minutoBase += this.intervaloMinutos;
+
+                    //ussamos un while por si el partido dura 120 mins o mas
+                    while (minutoBase >= 60) {
+                        minutoBase -= 60;
+                        horaBase += 1;
+                    }
+
+                    //evitamos que den las "25:00 hrs"
+                    if (horaBase >= 24) {
+                        horaBase -= 24;
+                    }
+                }
+            }
+        }
+    }
+    //Getters
 
     public String getNombre() { return nombre; }
     public Disciplina getDisciplina() { return disciplina; }

@@ -203,6 +203,9 @@ public class PanelTablaTorneo extends JPanel implements org.logica.Observer {
         boolean esPaseAutomatico = (enf.getParticipante1() instanceof ParticipanteVacio || enf.getParticipante2() instanceof ParticipanteVacio);
         boolean esEliminatoria = GestorTorneo.getInstancia().getFormato() != FormatoTorneo.LIGA_SIMPLE;
 
+        //saber si el partido esta atascado en un empate
+        boolean necesitaDesempate = enf.isJugado() && enf.getGanador() == null && esEliminatoria;
+
         // Panel contenedor de texto e iconos
         JPanel panelPartido = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         panelPartido.setOpaque(false);
@@ -251,10 +254,17 @@ public class PanelTablaTorneo extends JPanel implements org.logica.Observer {
             panelBotones.add(btnEditar);
         }
 
-        // Botón "Registrar"
-        if (!enf.isJugado() && !esPaseAutomatico) {
-            JButton btnRegistrar = new JButton("Registrar");
-            btnRegistrar.setFont(new Font("Arial", Font.PLAIN, 11));
+        //boton de "Registrar" o "Desempatar"
+        //aparece si no se ha jugado, o si se jugo pero necesita desempate, missclick, cosas asi
+        if ((!enf.isJugado() || necesitaDesempate) && !esPaseAutomatico) {
+            JButton btnRegistrar = new JButton(necesitaDesempate ? "Desempatar" : "Registrar");
+            btnRegistrar.setFont(new Font("Arial", Font.BOLD, 11));
+
+            //si es para desempatar, lo ponemos en texto rojo para llamar la atención
+            if (necesitaDesempate) {
+                btnRegistrar.setForeground(Color.RED);
+            }
+
             btnRegistrar.addActionListener(e -> {
                 Window ventanaPadre = SwingUtilities.getWindowAncestor(this);
                 Frame frame = (ventanaPadre instanceof Frame) ? (Frame) ventanaPadre : null;
@@ -263,16 +273,18 @@ public class PanelTablaTorneo extends JPanel implements org.logica.Observer {
             panelBotones.add(btnRegistrar);
         }
 
-        // Aspecto visual de las filas
+        //aspecto visual de las filas (colore de fondo)
         if (esPaseAutomatico) {
-            fila.setBackground(new Color(230, 230, 230));
+            fila.setBackground(new Color(230, 230, 230)); //gris
             lblP1.setForeground(Color.GRAY);
             lblP2.setForeground(Color.GRAY);
             lblCentro.setForeground(Color.GRAY);
+        } else if (necesitaDesempate) {
+            fila.setBackground(new Color(255, 200, 200)); //rojjo suave (alerta de empate)
         } else if (enf.isJugado()) {
-            fila.setBackground(new Color(220, 245, 220));
+            fila.setBackground(new Color(220, 245, 220)); //verde (completado)
         } else {
-            fila.setBackground(new Color(255, 250, 220));
+            fila.setBackground(new Color(255, 250, 220)); //amarillo pendiente
         }
 
         fila.add(panelPartido, BorderLayout.CENTER);

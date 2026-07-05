@@ -19,6 +19,11 @@ public enum Disciplina {
 
         @Override
         public boolean tieneModalidadFija() { return true;}
+
+        @Override
+        public int getMinimoJugadores() { return 5; } // futbol 5 minimo
+        @Override
+        public int getMaximoJugadores() { return 22; } //si quieres suplentes
     }    ,
     AJEDREZ {
         @Override
@@ -43,6 +48,10 @@ public enum Disciplina {
 
         @Override
         public boolean tieneModalidadFija() { return true;}
+        @Override
+        public int getMinimoJugadores() { return 1; }
+        @Override
+        public int getMaximoJugadores() { return 1; }
     },
     VIDEOJUEGOS {
         @Override
@@ -62,6 +71,10 @@ public enum Disciplina {
 
         @Override
         public boolean tieneModalidadFija() { return false;}
+        @Override
+        public int getMinimoJugadores() { return 1; }
+        @Override
+        public int getMaximoJugadores() { return 5; } //equipode Valo
     },
     TENIS {
         @Override
@@ -82,6 +95,10 @@ public enum Disciplina {
 
         @Override
         public boolean tieneModalidadFija() { return false;}
+        @Override
+        public int getMinimoJugadores() { return 1; }
+        @Override
+        public int getMaximoJugadores() { return 2; } //dobles
     },
     BASQUETBOL {
         @Override
@@ -102,6 +119,10 @@ public enum Disciplina {
 
         @Override
         public boolean tieneModalidadFija() { return true;}
+        @Override
+        public int getMinimoJugadores() { return 5; }
+        @Override
+        public int getMaximoJugadores() { return 12; }
     },
     VOLEIBOL {
         @Override
@@ -122,6 +143,10 @@ public enum Disciplina {
 
         @Override
         public boolean tieneModalidadFija() { return true;}
+        @Override
+        public int getMinimoJugadores() { return 6; }
+        @Override
+        public int getMaximoJugadores() { return 12; }
     },
     BOXEO {
         @Override
@@ -143,6 +168,10 @@ public enum Disciplina {
 
         @Override
         public boolean tieneModalidadFija() { return true;}
+        @Override
+        public int getMinimoJugadores() { return 1; }
+        @Override
+        public int getMaximoJugadores() { return 1; }
     };
 
     public abstract boolean esValido(float p1, float p2);
@@ -153,5 +182,6 @@ public enum Disciplina {
     //o una partida de ajedrez en equipos)
     public abstract boolean tipoParticipantePermitido(String tipo);
     public abstract boolean tieneModalidadFija();
-
+    public abstract int getMinimoJugadores();
+    public abstract int getMaximoJugadores();
 }
