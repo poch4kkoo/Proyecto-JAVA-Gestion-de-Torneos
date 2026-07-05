@@ -96,11 +96,26 @@ public class PanelCalendario extends JPanel implements org.logica.Observer {
 
         JLabel lblNum = new JLabel(" " + numero + " ", SwingConstants.CENTER);
         lblNum.setOpaque(true);
-        lblNum.setBackground(new Color(39, 174, 96)); // Verde
+        lblNum.setBackground(new Color(39, 174, 96)); // Verde distintivo
         lblNum.setForeground(Color.WHITE);
         lblNum.setFont(new Font("Arial", Font.BOLD, 12));
 
+        String textoLlave = enf.getLlave().toUpperCase();
+        FormatoTorneo formato = GestorTorneo.getInstancia().getFormato();
+
+        // Etiqueta para el Formato del torneo
+        if (formato == FormatoTorneo.LIGA_SIMPLE) {
+            textoLlave = "LIGA";
+        } else if (formato == FormatoTorneo.ELIMINATORIA_DIRECTA) {
+            textoLlave = "ELIMINATORIA";
+        }
+
+        JLabel lblInfo = new JLabel("| " + textoLlave + " |");
+        lblInfo.setForeground(Color.GRAY);
+        lblInfo.setFont(new Font("Arial", Font.BOLD, 11));
+
         pnlIzq.add(lblNum);
+        pnlIzq.add(lblInfo);
 
         // Banderas y Nombres
         JPanel pnlCentro = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
