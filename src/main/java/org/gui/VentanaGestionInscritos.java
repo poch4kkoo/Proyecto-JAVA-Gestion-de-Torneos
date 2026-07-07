@@ -107,6 +107,13 @@ public class VentanaGestionInscritos extends JDialog {
                 return;
             }
             ((Equipo) seleccionado).agregarMiembro(nombreMiembro);
+
+            int antes = ((Equipo) seleccionado).getNombresMiembros().size();
+            if (((Equipo) seleccionado).getNombresMiembros().size() == antes) {
+
+                JOptionPane.showMessageDialog(this, "El miembro \"" + nombreMiembro + "\" ya esta en el equipo");
+            }
+
             txtNuevoMiembro.setText("");
             mostrarDetalle();
         });
