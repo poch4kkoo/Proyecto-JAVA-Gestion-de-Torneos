@@ -225,6 +225,15 @@ public class VentanaRegistro extends JFrame implements Observer {
                 JOptionPane.showMessageDialog(this, "Ingrese el nombre del miembro.");
                 return;
             }
+
+            for (int i = 0; i < modeloMiembrosPendientes.size(); i++) {
+                if (modeloMiembrosPendientes.get(i).equalsIgnoreCase(nombreMiembro)) {
+
+                    JOptionPane.showMessageDialog(this, "Este miembro ya esta agregado.");
+                    return ;
+                }
+            }
+
             modeloMiembrosPendientes.addElement(nombreMiembro);
             txtMiembro.setText("");
         });
@@ -293,6 +302,15 @@ public class VentanaRegistro extends JFrame implements Observer {
             if (nombrePart.trim().isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Ingrese un nombre válido.");
                 return;
+            }
+
+            for (Participante p : GestorTorneo.getInstancia().getInscritos()) {
+
+                if (p.getNombre().equalsIgnoreCase(nombrePart.trim())) {
+                    JOptionPane.showMessageDialog(this, "Ya existe un participante inscrito con el nombre \"" + nombrePart.trim() + "\".");
+
+                    return ;
+                }
             }
 
             if (contactoPart.isEmpty()) {

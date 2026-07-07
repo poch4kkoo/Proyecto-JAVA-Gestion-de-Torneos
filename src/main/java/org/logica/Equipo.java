@@ -12,7 +12,11 @@ public class Equipo extends Participante{
     }
 
     public void agregarMiembro(String nombreJugador) {
-        this.nombresMiembros.add(nombreJugador);
+
+        if(nombreJugador == null || nombreJugador.trim().isEmpty()) { return ;}
+        if(nombresMiembros.contains(nombreJugador.trim())) { return ; }
+
+        this.nombresMiembros.add(nombreJugador.trim());
     }
 
     public void removerMiembro(String nombreJugador) { this.nombresMiembros.remove(nombreJugador);}
