@@ -38,9 +38,31 @@ public class PanelTablaTorneo extends JPanel implements org.logica.Observer {
 
         // Evento para arrancar el torneo
         btnGenerar.addActionListener((ActionEvent e) -> {
+            int cantidad = GestorTorneo.getInstancia().getInscritos().size();
+
+            if (cantidad < 2) {
+                JOptionPane.showMessageDialog(null, "Se necesita al menos 2 participantes para generar el torneo.", "Participantes insuficientes", JOptionPane.WARNING_MESSAGE);
+                return ;
+            }
+
+            FormatoTorneo formato = GestorTorneo.getInstancia().getFormato();
+
+            if (formato == FormatoTorneo.LIGA_SIMPLE && cantidad < 3) {
+                JOptionPane.showMessageDialog(null, "Se recomienda que haya al menos 3 participantes para Liga Simple.", "Recomendacion participantes", JOptionPane.INFORMATION_MESSAGE);
+
+                int opcion = JOptionPane.showConfirmDialog(null, "¿Desea continuar con la generacion de la Tabla de Torneo?",  "Confirmacion", JOptionPane.YES_NO_OPTION);
+
+                if (opcion != JOptionPane.YES_OPTION) {
+                    return;
+                }
+            }
+
+
             GestorTorneo.getInstancia().generarTorneo();
             GestorTorneo.getInstancia().notificar();
         });
+
+
 
         //avanza a la siguiente ronda cuando todos los partidos estan jugados
         btnSiguienteRonda.addActionListener((ActionEvent e) -> {
