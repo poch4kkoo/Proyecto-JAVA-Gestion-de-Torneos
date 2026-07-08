@@ -109,7 +109,7 @@ public class VentanaRegistro extends JFrame implements Observer {
         panelFormulario.add(btnInscribir);
 
         // Previsualizacion de la bandera del equipo
-        comboCategoria = new JComboBox<>(new String[]{"Banderas", "Avatares", "Personajes"});
+        comboCategoria = new JComboBox<>(new String[]{"Banderas", "Avatares", "Selecciones"});
         comboArchivo = new JComboBox<>();
 
         // Actualiza los archivos disponibles según la categoría elegida
@@ -483,8 +483,24 @@ public class VentanaRegistro extends JFrame implements Observer {
             comboArchivo.addItem("avatar_5.png");
             comboArchivo.addItem("avatar_6.png");
 
-        } else if ("Personajes".equals(categoria)) {
-
+        } else if ("Selecciones".equals(categoria)) {
+            comboArchivo.addItem("s_alemania.png");
+            comboArchivo.addItem("s_argentina.png");
+            comboArchivo.addItem("s_brasil.png");
+            comboArchivo.addItem("s_cabo_verde.png");
+            comboArchivo.addItem("s_canada.png");
+            comboArchivo.addItem("s_chile.png");
+            comboArchivo.addItem("s_colombia.png");
+            comboArchivo.addItem("s_croacia.png");
+            comboArchivo.addItem("s_ecuador.png");
+            comboArchivo.addItem("s_espana.png");
+            comboArchivo.addItem("s_italia.png");
+            comboArchivo.addItem("s_japon.png");
+            comboArchivo.addItem("s_mexico.png");
+            comboArchivo.addItem("s_paisesbajos.png");
+            comboArchivo.addItem("s_paraguay.png");
+            comboArchivo.addItem("s_peru.png");
+            comboArchivo.addItem("s_uruguay.png");
         }
     }
 
