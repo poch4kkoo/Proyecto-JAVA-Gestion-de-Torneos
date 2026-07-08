@@ -476,6 +476,12 @@ public class VentanaRegistro extends JFrame implements Observer {
 
         } else if ("Avatares".equals(categoria)) {
             comboArchivo.addItem("avatar_0.png");
+            comboArchivo.addItem("avatar_1.png");
+            comboArchivo.addItem("avatar_2.png");
+            comboArchivo.addItem("avatar_3.png");
+            comboArchivo.addItem("avatar_4.png");
+            comboArchivo.addItem("avatar_5.png");
+            comboArchivo.addItem("avatar_6.png");
 
         } else if ("Personajes".equals(categoria)) {
 

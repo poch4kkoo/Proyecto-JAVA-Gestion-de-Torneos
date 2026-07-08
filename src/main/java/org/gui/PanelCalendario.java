@@ -59,7 +59,7 @@ public class PanelCalendario extends JPanel implements org.logica.Observer {
                 headerDia.setBackground(new Color(41, 128, 185)); // Color
                 headerDia.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
 
-                JLabel lblDia = new JLabel("Calendario " + entrada.getKey());
+                JLabel lblDia = new JLabel(entrada.getKey());
                 lblDia.setForeground(Color.WHITE);
                 lblDia.setFont(new Font("Arial", Font.BOLD, 13));
                 headerDia.add(lblDia);
