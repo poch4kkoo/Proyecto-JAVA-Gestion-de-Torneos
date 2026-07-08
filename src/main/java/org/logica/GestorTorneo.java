@@ -290,12 +290,37 @@ public class GestorTorneo {
 
             // Caso 1: Quedan partidos en la wb
             if (wb.size() > 1) {
-                for (int i = 0; i < ganadoresWB.size(); i += 2) {
+
+                int limiteGWB = ganadoresWB.size();
+                boolean esImparGWB = (limiteGWB % 2 != 0);
+
+                if (esImparGWB) {
+                    limiteGWB--;
+                }
+
+                for (int i = 0; i < limiteGWB; i += 2) {
                     enfrentamientos.add(new Enfrentamiento(ganadoresWB.get(i), ganadoresWB.get(i + 1), this.rondaActual, "Ganadores"));
                 }
+
+                if (esImparGWB) {
+                    enfrentamientos.add(new Enfrentamiento(ganadoresWB.get(ganadoresWB.size() - 1), new ParticipanteVacio(), this.rondaActual, "Ganadores"));
+                }
+
                 if (lb.isEmpty()) {
-                    for (int i = 0; i < perdedoresWB.size(); i += 2) {
+
+                    int limitePWB = perdedoresWB.size();
+                    boolean esImparPWB = (limitePWB % 2 != 0);
+
+                    if (esImparPWB) {
+                        limitePWB--;
+                    }
+
+                    for (int i = 0; i < limitePWB; i += 2) {
                         enfrentamientos.add(new Enfrentamiento(perdedoresWB.get(i), perdedoresWB.get(i + 1), this.rondaActual, "Perdedores"));
+                    }
+
+                    if (esImparPWB) {
+                        enfrentamientos.add(new Enfrentamiento(perdedoresWB.get(perdedoresWB.size() - 1),new ParticipanteVacio(), this.rondaActual, "Perdedores"));
                     }
                 }
             }
@@ -310,8 +335,20 @@ public class GestorTorneo {
             // Caso 3: el ganador de la wb esta esperando en gf, solo la de perdedores sigue activa
             else if (wb.isEmpty() && !lb.isEmpty()) {
                 if (ganadoresLB.size() > 1) {
-                    for (int i = 0; i < ganadoresLB.size(); i += 2) {
+
+                    int limiteLB = ganadoresLB.size();
+                    boolean esImparLB = (limiteLB %  2 != 0);
+
+                    if (esImparLB) {
+                        limiteLB--;
+                    }
+
+                    for (int i = 0; i < limiteLB; i += 2) {
                         enfrentamientos.add(new Enfrentamiento(ganadoresLB.get(i), ganadoresLB.get(i + 1), this.rondaActual, "Perdedores"));
+                    }
+
+                    if (esImparLB) {
+                        enfrentamientos.add(new Enfrentamiento(ganadoresLB.get(ganadoresLB.size() - 1), new ParticipanteVacio(), this.rondaActual, "Perdedores"));
                     }
                 }
                 else if (ganadoresLB.size() == 1) {
