@@ -46,6 +46,10 @@ public class PanelCalendario extends JPanel implements org.logica.Observer {
             // Agrupar los partidos segun su fecha
             Map<String, List<Enfrentamiento>> porFecha = new LinkedHashMap<>();
             for (Enfrentamiento enf : partidos) {
+                // Filtramos los pases automáticos
+                if (enf.getParticipante1() instanceof ParticipanteVacio || enf.getParticipante2() instanceof ParticipanteVacio) {
+                    continue;
+                }
                 porFecha.computeIfAbsent(enf.getFecha(), k -> new ArrayList<>()).add(enf);
             }
 
@@ -54,20 +58,47 @@ public class PanelCalendario extends JPanel implements org.logica.Observer {
             // interfaz gráfica
             for (Map.Entry<String, List<Enfrentamiento>> entrada : porFecha.entrySet()) {
 
-                // Barra para dia
-                JPanel headerDia = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
-                headerDia.setBackground(new Color(41, 128, 185)); // Color
-                headerDia.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
+                String fechaActual = entrada.getKey();
+                List<Enfrentamiento> partidosDelDia = entrada.getValue();
 
-                JLabel lblDia = new JLabel(entrada.getKey());
+                // Barra del Día
+                JPanel headerDia = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+                headerDia.setBackground(new Color(41, 128, 185)); // Azul
+                headerDia.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
+
+                JLabel lblDia = new JLabel(fechaActual);
                 lblDia.setForeground(Color.WHITE);
                 lblDia.setFont(new Font("Arial", Font.BOLD, 13));
                 headerDia.add(lblDia);
 
+                // Boton de edicion fecha
+                JButton btnEditarFecha = new JButton("Editar");
+                btnEditarFecha.setFont(new Font("Arial", Font.PLAIN, 10));
+                btnEditarFecha.setMargin(new Insets(2, 5, 2, 5));
+                btnEditarFecha.setFocusPainted(false);
+                btnEditarFecha.setToolTipText("Editar fecha de esta jornada");
+
+                btnEditarFecha.addActionListener(e -> {
+                    String nuevaFecha = JOptionPane.showInputDialog(
+                            this,
+                            "Ingrese la nueva fecha para esta jornada:",
+                            fechaActual
+                    );
+
+                    if (nuevaFecha != null && !nuevaFecha.trim().isEmpty()) {
+                        String fechaFormateada = nuevaFecha.trim().toUpperCase();
+                        for (Enfrentamiento enf : partidosDelDia) {
+                            enf.setFecha(fechaFormateada);
+                        }
+                        actualizar(); // Volvemos a dibujar el calendario
+                    }
+                });
+
+                headerDia.add(btnEditarFecha);
                 panelContenedor.add(headerDia);
 
-                // Filas para los partidos del día
-                for (Enfrentamiento enf : entrada.getValue()) {
+                // partidos de ese día
+                for (Enfrentamiento enf : partidosDelDia) {
                     panelContenedor.add(crearFilaPartido(enf, contadorPartido));
                     contadorPartido++;
                 }
@@ -86,7 +117,7 @@ public class PanelCalendario extends JPanel implements org.logica.Observer {
         fila.setBackground(Color.WHITE);
         fila.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(220, 220, 220)),
-                BorderFactory.createEmptyBorder(8, 10, 8, 10) // Margenes
+                BorderFactory.createEmptyBorder(8, 10, 8, 10)
         ));
         fila.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
 
@@ -96,7 +127,7 @@ public class PanelCalendario extends JPanel implements org.logica.Observer {
 
         JLabel lblNum = new JLabel(" " + numero + " ", SwingConstants.CENTER);
         lblNum.setOpaque(true);
-        lblNum.setBackground(new Color(39, 174, 96)); // Verde distintivo
+        lblNum.setBackground(new Color(39, 174, 96)); // Verde
         lblNum.setForeground(Color.WHITE);
         lblNum.setFont(new Font("Arial", Font.BOLD, 12));
 
@@ -136,25 +167,16 @@ public class PanelCalendario extends JPanel implements org.logica.Observer {
         pnlCentro.add(lblVs);
         pnlCentro.add(lblP2);
 
-        // Hora y recinto a la derecha
-        JPanel pnlDer = new JPanel();
-        pnlDer.setLayout(new BoxLayout(pnlDer, BoxLayout.Y_AXIS));
+        //Hora del partido
+        JPanel pnlDer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
         pnlDer.setOpaque(false);
 
         JLabel lblHora = new JLabel(enf.getHora());
         lblHora.setFont(new Font("Arial", Font.BOLD, 12));
         lblHora.setForeground(new Color(39, 174, 96));
-        lblHora.setAlignmentX(Component.RIGHT_ALIGNMENT);
-
-        JLabel lblRecinto = new JLabel(enf.getRecinto() != null ? enf.getRecinto() : "");
-        lblRecinto.setFont(new Font("Arial", Font.PLAIN, 10));
-        lblRecinto.setForeground(Color.GRAY);
-        lblRecinto.setAlignmentX(Component.RIGHT_ALIGNMENT);
-
         pnlDer.add(lblHora);
-        pnlDer.add(lblRecinto);
 
-        // Paneles
+        // Ensamblaje
         fila.add(pnlIzq, BorderLayout.WEST);
         fila.add(pnlCentro, BorderLayout.CENTER);
         fila.add(pnlDer, BorderLayout.EAST);
