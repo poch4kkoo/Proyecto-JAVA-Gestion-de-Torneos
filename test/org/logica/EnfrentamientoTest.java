@@ -79,4 +79,43 @@ public class EnfrentamientoTest {
         assertTrue(enfrentamiento.isJugado(), "El partido debe marcarse como jugado.");
         assertNull(enfrentamiento.getGanador(), "En caso de empate reglamentario, el ganador directo debería ser nulo.");
     }
+
+    /**
+     * Valida la regla de pase automático (BYE) cuando el primer participante es un objeto nulo o vacío,
+     * determinando al oponente real como ganador automático sin necesidad de jugar el partido.
+     */
+    @Test
+    void testGanadorAutomaticoPorParticipante1Vacio() {
+        Participante vacio = new ParticipanteVacio();
+        Enfrentamiento partidoBye = new Enfrentamiento(vacio, equipo2, 1, "Ganadores");
+
+        // Debe ganar el equipo2 inmediatamente, sin que se haya jugado.
+        assertFalse(partidoBye.isJugado());
+        assertEquals(equipo2, partidoBye.getGanador(), "Debe ganar el participante real si el local es Vacío.");
+    }
+
+    /**
+     * Valida la regla del pase automático (BYE) cuando el segundo participante es un objeto vacío o nulo,
+     * determinando al oponente real como ganador automático sin necesidad de jugar el partido.
+     */
+    @Test
+    void testGanadorAutomaticoPorParticipante2Vacio() {
+        Participante vacio = new ParticipanteVacio();
+        Enfrentamiento partidoBye = new Enfrentamiento(equipo1, vacio, 1, "Ganadores");
+
+        assertFalse(partidoBye.isJugado());
+        assertEquals(equipo1, partidoBye.getGanador(), "Debe ganar el participante real si el visitante es Vacío.");
+    }
+
+    /**
+     * Verifica el control de errores al intentar registrar marcadores ilegales
+     * (goles negativos en Fútbol), comprobando que se lance una excepción.
+     */
+    @Test
+    void testRegistrarResultadoInvalidoLanzaException() {
+        //no se permiten goles negativos
+        assertThrows(IllegalArgumentException.class, () -> {
+            enfrentamiento.registrarResultado(-1, 2);
+        }, "Debería lanzar una excepción si se ingresan puntajes negativos en Fútbol.");
+    }
 }
