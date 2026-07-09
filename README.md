@@ -1,7 +1,17 @@
+Grupo 21
 Integrantes:
 Javiera Antonia Diaz Grandon 
 Tomas Ignacio Pizarro Abarca
 Pablo Sebastian Bascuñan Espina
+
+### Sobre el proyecto:
+
+Programa diseñado para facilitar la creación de torneos, en él se pueden registrar Jugadores/Equipos en torneos de eliminatoria directa, eliminatoria doble o liga simple. 
+El sistema permite asignar una imagen para representar al Jugador/Equipo, se pueden seleccionar iconos ya cargados en el programa o puede agregar imágenes desde su computadora.
+
+Una vez están todos los participantes registrados, se puede avanzar a la siguiente pestaña para generar la tabla de enfrentamientos. Dentro se puede editar la llave inicial para que el usuario decida los enfrentamientos. En caso de que en un torneo de Eliminatoria no haya suficientes participantes el programa integra el sistema de “Byes”.
+
+En la pestaña “Calendario” se genera una lista con la hora de los partidos, El organizador podrá editar la fecha de cada Jornada.
 
 ### Para ejecutar el proyecto:
 1. Clonar el repositorio.
@@ -9,7 +19,7 @@ Pablo Sebastian Bascuñan Espina
 3. Configurar el SDK (java 17 o superior).
 4. Ejecutar la clase "Main" ubicada en "src/main/java/main/Main.java".
 
-##Arquitectura y Patrones de Diseño
+### Arquitectura y Patrones de Diseño
 
 Este proyecto fue desarrollado asplicando una separacion estricta entre la logica y la interfaz grafica. Para lograr un codigo escalable y mantenible, se implementaron los siguientes patrones de diseño:
 
@@ -52,6 +62,7 @@ classDiagram
         +configurarTorneo(nombre: String, disciplina: Disciplina, formato: FormatoTorneo) void
         +inscribirParticipante(participante: Participante) void
         +eliminarParticipante(participante: Participante) void
+        +intercambiarParticipantes(p1: Participante, p2: Participante) void
         +generarTorneo() void
         +rondaActualTerminada() boolean
         +avanzarRonda() void
@@ -108,6 +119,9 @@ classDiagram
         -jugado: boolean
         -puntaje1: float
         -puntaje2: float
+        -llave: String
+        -hora: String
+        -recinto: String
         +Enfrentamiento(p1: Participante, p2: Participante)
         +Enfrentamiento(p1: Participante, p2: Participante, ronda: int)
         +getRonda() int
@@ -119,6 +133,9 @@ classDiagram
         +getPuntaje2() float
         +registrarResultado(puntos1: float, puntos2: float) void
         +getGanador() Participante
+        +getLlave() String
+        +setHora(hora: String) void
+        +setRecinto(recinto: String) void
     }
 
     class Disciplina {
