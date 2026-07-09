@@ -1,13 +1,16 @@
 package org.logica;
+
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
+
 /**
- * clase de pruebas unitarias para el patron factory (participantefactory).
- * verifica la correcta instanciacion de los distintos tipos de participantes.
+ * Clase de pruebas unitarias para la fabrica ParticipanteFactory.
  */
 public class ParticipanteFactoryTest {
+
     /**
-     * verifica que la fabrica cree correctamente un objeto de tipo jugador.
+     * Verifica que la fabrica cree correctamente una instancia de Jugador
+     * cuando se solicita el tipo "Jugador", validando sus propiedades basicas.
      */
     @Test
     public void testCrearJugador() {
@@ -16,8 +19,10 @@ public class ParticipanteFactoryTest {
         assertEquals("Tomas",p.getNombre());
         assertEquals("Individual",p.getTipo());
     }
+
     /**
-     * verifica que la fabrica cree correctamente un objeto de tipo equipo.
+     * Verifica que la fabrica cree correctamente una instancia de Equipo
+     * cuando se solicita el tipo "Equipo", validando sus propiedades basicas.
      */
     @Test
     public void testCrearEquipo() {
@@ -26,9 +31,9 @@ public class ParticipanteFactoryTest {
         assertEquals("Los Leones",p.getNombre());
         assertEquals("Equipo",p.getTipo());
     }
+
     /**
-     * verifica el manejo de excepciones de la fabrica.
-     * comprueba que lance un error si se solicita un tipo de participante inexistente.
+     * Valida que la fabrica lance una excepcian controlada si se ingresa un tipo desconocido.
      */
     @Test
     public void testTipoInvalido() {
@@ -36,5 +41,18 @@ public class ParticipanteFactoryTest {
         assertThrows(IllegalArgumentException.class, () -> {
             ParticipanteFactory.crearParticipante("Marciano","3","Alien","000");
         });
+    }
+
+    /**
+     * Valida que el metodo de la fabrica sea insensible a mayusculas/minusculas
+     * al evaluar las cadenas que determinan el tipo de participante.
+     */
+    @Test
+    public void testCrearParticipanteIgnoraMayusculas() {
+        Participante p1 = ParticipanteFactory.crearParticipante("jugador", "10", "Juan", "abc");
+        Participante p2 = ParticipanteFactory.crearParticipante("EQUIPO", "11", "Club", "def");
+
+        assertTrue(p1 instanceof Jugador);
+        assertTrue(p2 instanceof Equipo);
     }
 }
