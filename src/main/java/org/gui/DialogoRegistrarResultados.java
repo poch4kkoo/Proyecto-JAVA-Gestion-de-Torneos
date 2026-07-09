@@ -3,13 +3,25 @@ package org.gui;
 import org.logica.*;
 import javax.swing.*;
 import java.awt.*;
-
+/**
+ * ventana de dialogo para registrar el resultado de un enfrentamiento especifico.
+ * permite al usuario ingresar el puntaje de cada participante y valida
+ * la entrada segun la disciplina del torneo.
+ */
 public class DialogoRegistrarResultados extends JDialog {
 
     private Enfrentamiento enfrentamiento;
     private JSpinner spinner1;
     private JSpinner spinner2;
-
+    /**
+     * constructor del dialogo para ingresar resultados.
+     * configura la interfaz grafica, inicializa los selectores numericos
+     * dependiendo de la disciplina (por ejemplo, ajedrez permite medios puntos)
+     * y establece las acciones de los botones.
+     *
+     * @param owner el frame principal sobre el que se mostrara el dialogo.
+     * @param enfrentamiento el partido del cual se va a registrar el marcador.
+     */
     public DialogoRegistrarResultados(Frame owner, Enfrentamiento enfrentamiento) {
         super(owner, "Registrar Resultado", true);
         this.enfrentamiento = enfrentamiento;

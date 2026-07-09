@@ -3,9 +3,19 @@ package org.gui;
 import org.logica.*;
 import javax.swing.*;
 import java.awt.*;
-
+/**
+ * ventana de dialogo que permite intercambiar participantes entre los partidos
+ * de la primera ronda de un torneo eliminatorio.
+ */
 public class DialogoEditarEnfrentamiento extends JDialog {
-
+    /**
+     * constructor del dialogo de edicion.
+     * prepara los selectores desplegables para elegir que participantes
+     * se van a intercambiar de posicion en la tabla.
+     *
+     * @param owner el frame principal que invoca este dialogo.
+     * @param enfrentamientoActual el partido desde el cual se abrio la opcion de edicion.
+     */
     public DialogoEditarEnfrentamiento(Frame owner, Enfrentamiento enfrentamientoActual) {
         super(owner, "Editar Enfrentamiento", true);
         setSize(400, 240);
@@ -15,7 +25,7 @@ public class DialogoEditarEnfrentamiento extends JDialog {
         JPanel panelCentral = new JPanel(new GridLayout(4, 1, 5, 5));
         panelCentral.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
 
-        // Se muestran los participnates del partido a intercambiar
+        //se muestran los participnates del partido a intercambiar
         panelCentral.add(new JLabel("Se cambiará a:"));
         JComboBox<Participante> comboOrigen = new JComboBox<>();
 
@@ -23,7 +33,7 @@ public class DialogoEditarEnfrentamiento extends JDialog {
         comboOrigen.addItem(enfrentamientoActual.getParticipante2());
         panelCentral.add(comboOrigen);
 
-        // Se muestran todos los participantes para intercambiar
+        //se muestran todos los participantes para intercambiar
         panelCentral.add(new JLabel("por:"));
         JComboBox<Participante> comboDestino = new JComboBox<>();
 
@@ -48,7 +58,7 @@ public class DialogoEditarEnfrentamiento extends JDialog {
             Participante p2 = (Participante) comboDestino.getSelectedItem();
 
             if (p1 != null && p2 != null && p1 != p2) {
-                // Ejecutamos el swap que hicimos en GestorTorneo
+                //ejecutamos el swap que hicimos en GestorTorneo
                 GestorTorneo.getInstancia().intercambiarParticipantes(p1, p2);
             }
             dispose();

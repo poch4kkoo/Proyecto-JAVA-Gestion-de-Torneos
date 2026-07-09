@@ -3,7 +3,10 @@ import org.logica.*; //importa el GestorTorneo, la Fabrica, las Disciplinas, etc
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-
+/**
+ * clase principal de la interfaz grafica que maneja el registro de torneos y participantes.
+ * implementa el patron observer para reaccionar a los cambios en el gestor central.
+ */
 public class VentanaRegistro extends JFrame implements Observer {
 
     private JComboBox<Disciplina> comboDisciplina;
@@ -35,7 +38,11 @@ public class VentanaRegistro extends JFrame implements Observer {
 
     private DefaultListModel<String> modeloListaInscritos;
     private JList<String> listaInscritosVisual;
-
+    /**
+     * constructor de la ventana de registro.
+     * inicializa todos los componentes visuales, paneles de configuracion, selectores de imagenes
+     * y establece las pestañas principales de la aplicacion.
+     */
     public VentanaRegistro() {
         setTitle("Sistema de Gestión de Torneos - Registro");
         setSize(600, 800);
@@ -46,7 +53,7 @@ public class VentanaRegistro extends JFrame implements Observer {
         GestorTorneo.getInstancia().registrarObserver(this);
 
         //panel superior: configurar el torneo
-        JPanel panelNorte = new JPanel(new GridLayout(4, 4, 5, 5)); // Cambiamos a 3 filas
+        JPanel panelNorte = new JPanel(new GridLayout(4, 4, 5, 5)); //cambiamos a 3 filas
         panelNorte.setBorder(BorderFactory.createTitledBorder("1. Definir Características del Torneo"));
 
         txtNombreTorneo = new JTextField();
@@ -60,13 +67,13 @@ public class VentanaRegistro extends JFrame implements Observer {
         spinCanchas = new JSpinner(new SpinnerNumberModel(3, 1, 50, 1)); //1 cancha min
         spinIntervalo = new JSpinner(new SpinnerNumberModel(60, 15, 300, 15));//tiempo dsps de cada partido
 
-        // Fila 1
+        //fila 1
         panelNorte.add(new JLabel("Nombre:"));
         panelNorte.add(txtNombreTorneo);
         panelNorte.add(new JLabel("Disciplina:"));
         panelNorte.add(comboDisciplina);
 
-        // Fila 2
+        //fila 2
         panelNorte.add(new JLabel("Formato:"));
         panelNorte.add(comboFormato);
         panelNorte.add(new JLabel("N° Canchas/Mesas:"));
@@ -74,7 +81,7 @@ public class VentanaRegistro extends JFrame implements Observer {
         panelNorte.add(new JLabel("Duración partido (min):"));
         panelNorte.add(spinIntervalo);
 
-        // Fila 3
+        //fila 3
         JPanel panelTiempo = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         panelTiempo.add(spinHora);
         panelTiempo.add(new JLabel(" : "));
@@ -82,16 +89,16 @@ public class VentanaRegistro extends JFrame implements Observer {
 
         panelNorte.add(new JLabel("Hora Inicio:"));
         panelNorte.add(panelTiempo);
-        panelNorte.add(new JLabel("")); // Espacio vacío para rellenar la grilla
+        panelNorte.add(new JLabel("")); //espacio vacio para rellenar la grilla
         panelNorte.add(btnConfigurar);
 
-        //panel central: inscribir participantes
+        //panel central:inscribir participantes
         JPanel panelCentro = new JPanel(new BorderLayout());
         panelCentro.setBorder(BorderFactory.createTitledBorder("2. Inscripción de Participantes"));
 
         JPanel panelDatosParticipante = new JPanel(new BorderLayout(10, 10));
 
-        // Datos de los jugadores/equipos
+        //datos de los jugadores/equipos
         JPanel panelFormulario = new JPanel(new GridLayout(4, 2, 5, 5));
         comboTipoParticipante = new JComboBox<>(new String[]{"Jugador", "Equipo"});
         txtNombreParticipante = new JTextField();
@@ -108,11 +115,11 @@ public class VentanaRegistro extends JFrame implements Observer {
         panelFormulario.add(new JLabel(""));
         panelFormulario.add(btnInscribir);
 
-        // Previsualizacion de la bandera del equipo
+        //previsualizacion de la bandera del equipo
         comboCategoria = new JComboBox<>(new String[]{"Banderas", "Avatares", "Selecciones"});
         comboArchivo = new JComboBox<>();
 
-        // Actualiza los archivos disponibles según la categoría elegida
+        //actualiza los archivos disponibles segun la categoria elegida
         comboCategoria.addActionListener(e -> actualizarComboArchivos());
         actualizarComboArchivos(); // Carga inicial
 
@@ -120,14 +127,14 @@ public class VentanaRegistro extends JFrame implements Observer {
 
         JButton btnImagenPersonalizada = new JButton("Subir desde PC...");
 
-        // Panel de control para las fotos de la app
+        //panel de control para las fotos de la app
         JPanel panelSelectoresImg = new JPanel(new GridLayout(3, 1, 2, 2));
         panelSelectoresImg.add(comboCategoria);
         panelSelectoresImg.add(comboArchivo);
         panelSelectoresImg.add(btnAplicarAvatar);
         panelSelectoresImg.add(btnImagenPersonalizada);
 
-        // Vista previa física de la imagen
+        //vista previa física de la imagen
         lblAvatarPreview = new JLabel();
         lblAvatarPreview.setPreferredSize(new Dimension(80, 80));
         lblAvatarPreview.setBorder(BorderFactory.createLineBorder(Color.GRAY));
@@ -135,15 +142,15 @@ public class VentanaRegistro extends JFrame implements Observer {
         lblAvatarPreview.setHorizontalAlignment(SwingConstants.CENTER);
         lblAvatarPreview.setVerticalAlignment(SwingConstants.CENTER);
 
-        // Cargar imagen por defecto inicial
+        //cargar imagen por defecto inicial
         cargarImagenInterna("Avatares", "avatar_0.png");
 
-        // contenedor para el bloque izquierdo
+        //contenedor para el bloque izquierdo
         JPanel panelAvatarCompleto = new JPanel(new BorderLayout(5, 5));
         panelAvatarCompleto.add(lblAvatarPreview, BorderLayout.CENTER);
         panelAvatarCompleto.add(panelSelectoresImg, BorderLayout.SOUTH);
 
-        // Evento para aplicar la imagen seleccionada de los combos
+        //evento para aplicar la imagen seleccionada de los combos
         btnAplicarAvatar.addActionListener(e -> {
             String cat = (String) comboCategoria.getSelectedItem();
             String arc = (String) comboArchivo.getSelectedItem();
@@ -153,7 +160,7 @@ public class VentanaRegistro extends JFrame implements Observer {
         });
 
 
-        // Evento para que el usuario pueda subir una imagens desde su pc
+        //evento para que el usuario pueda subir una imagens desde su pc
         btnImagenPersonalizada.addActionListener((ActionEvent e) -> {
             JFileChooser fileChooser = new JFileChooser();
             fileChooser.setDialogTitle("Selecciona tu imagen personalizada");
@@ -162,10 +169,10 @@ public class VentanaRegistro extends JFrame implements Observer {
             int seleccion = fileChooser.showOpenDialog(this);
             if (seleccion == JFileChooser.APPROVE_OPTION) {
                 java.io.File archivoSeleccionado = fileChooser.getSelectedFile();
-                // Guardamos la ruta absoluta de la imagen
+                //guardamos la ruta absoluta de la imagen
                 rutaAvatarActual = archivoSeleccionado.getAbsolutePath();
 
-                // Actualizamos la vista previa
+                //actualizamos la vista previa
                 ImageIcon iconoNuevo = new ImageIcon(rutaAvatarActual);
                 Image img = iconoNuevo.getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH);
                 lblAvatarPreview.setIcon(new ImageIcon(img));
@@ -198,7 +205,7 @@ public class VentanaRegistro extends JFrame implements Observer {
         panelCentro.add(panelDatosParticipante, BorderLayout.NORTH);
         panelCentro.add(panelMiembros, BorderLayout.CENTER);
 
-        // Panel para agregar miembros de un equipo
+        //panel para agregar miembros de un equipo
         panelMiembros = new JPanel(new BorderLayout(5, 5));
         panelMiembros.setBorder(BorderFactory.createTitledBorder("Miembros del Equipo (a inscribir)"));
 
@@ -215,7 +222,7 @@ public class VentanaRegistro extends JFrame implements Observer {
         panelMiembros.add(new JScrollPane(listaMiembrosPendientes), BorderLayout.CENTER);
         panelMiembros.setVisible(false); // Arranca oculto, solo aplica a Equipo
 
-        // Lista de miembros al centro
+        //lista de miembros al centro
         panelCentro.add(panelDatosParticipante, BorderLayout.NORTH);
         panelCentro.add(panelMiembros, BorderLayout.CENTER);
 
@@ -243,7 +250,7 @@ public class VentanaRegistro extends JFrame implements Observer {
             panelMiembros.setVisible("Equipo".equalsIgnoreCase(tipo));
         });
 
-        //panel sur: lista de inscritos(OBSERVER)
+        //panel sur:lista de inscritos(OBSERVER)
         JPanel panelSur=new JPanel(new BorderLayout());
         panelSur.setBorder(BorderFactory.createTitledBorder("Participantes Registrados"));
         modeloListaInscritos=new DefaultListModel<>();
@@ -277,7 +284,7 @@ public class VentanaRegistro extends JFrame implements Observer {
                 return ;
             }
 
-            //  mandamos los nuevos datos al gestor
+            //mandamos los nuevos datos al gestor
             GestorTorneo.getInstancia().configurarTorneo(nombre, dis, form, hora, min, canchas, intervalo);
 
             txtNombreTorneo.setEnabled(false);
@@ -293,7 +300,7 @@ public class VentanaRegistro extends JFrame implements Observer {
             btnInscribir.setEnabled(true);
         });
 
-        // Evento Inscribir (USA EL FACTORY PATTERN)
+        //evento Inscribir (USA EL FACTORY PATTERN)
         btnInscribir.addActionListener((ActionEvent e) -> {
             String nombrePart = txtNombreParticipante.getText();
             String contactoPart = txtContactoParticipante.getText().trim();
@@ -324,7 +331,7 @@ public class VentanaRegistro extends JFrame implements Observer {
                 if (disActual != null) {
                     tipo = disActual.tipoParticipantePermitido("Individual") ? "Jugador" : "Equipo";
                 } else {
-                    tipo = "Jugador"; //Se pone por defecto
+                    tipo = "Jugador"; //se pone por defecto
                 }
             }
 
@@ -348,10 +355,10 @@ public class VentanaRegistro extends JFrame implements Observer {
 
             String idRandom = "ID-" + nombrePart.toUpperCase().replaceAll("\\s+", "");
 
-            // Crear e inscribir utilizando la fábrica original
+            //crear e inscribir utilizando la fábrica original
             Participante nuevo = ParticipanteFactory.crearParticipante(tipo, idRandom, nombrePart, contactoPart);
 
-            // Asignamos el avatar actual
+            //asignamos el avatar actual
             nuevo.setRutaAvatar(rutaAvatarActual);
 
             if (nuevo instanceof Equipo) {
@@ -384,22 +391,25 @@ public class VentanaRegistro extends JFrame implements Observer {
         panelRegistroCompleto.add(panelCentro, BorderLayout.CENTER);
         panelRegistroCompleto.add(panelSur, BorderLayout.SOUTH);
 
-        // Se crea una barra superior para elegin las pestañas
+        //se crea una barra superior para elegin las pestañas
         JTabbedPane pestanas = new JTabbedPane();
 
-        // Pestaña Regstro torneo
+        //pestaña Regstro torneo
         pestanas.addTab("Inscripción y Configuración", panelRegistroCompleto);
         PanelTablaTorneo panelVisualLlaves = new PanelTablaTorneo();
 
-        // Pestaña de tabla del torneo
+        //pestaña de tabla del torneo
         pestanas.addTab(" Tabla Torneo", panelVisualLlaves);
 
-        // Pestaña calendario
+        //pestaña calendario
         pestanas.addTab("Calendario", new PanelCalendario());
 
         add(pestanas, BorderLayout.CENTER);
     }
-
+    /**
+     * actualiza la lista visual de participantes inscritos y el titulo de la ventana
+     * cada vez que el gestor de torneo emite una notificacion.
+     */
     @Override
     public void actualizar() {
         //limpiamos la lista visual
@@ -417,12 +427,20 @@ public class VentanaRegistro extends JFrame implements Observer {
         }
     }
     //metodo main para que se pueda probar la ventana al instante
+    /**
+     * metodo principal para ejecutar la ventana de forma independiente con fines de prueba.
+     *
+     * @param args argumentos de linea de comandos.
+     */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             new VentanaRegistro().setVisible(true);
         });
     }
-
+    /**
+     * bloquea o habilita el selector de tipo de participante dependiendo de si la
+     * disciplina elegida tiene una modalidad fija(solo equipos o solo individuos).
+     */
     private void actualizarSugerenciaParticipante() {
         //si ya se configuro el torneo, no se altera nada de la interfaz
         if (!btnConfigurar.isEnabled()) return;
@@ -431,7 +449,7 @@ public class VentanaRegistro extends JFrame implements Observer {
         if (seleccionada == null) return;
 
         if (seleccionada.tieneModalidadFija()) {
-            // si la disciplina es "fija" (solo individual o solo equipos) se cambia la seleccion a estas y se "congela"
+            //si la disciplina es "fija" (solo individual o solo equipos) se cambia la seleccion a estas y se "congela"
             if (seleccionada.tipoParticipantePermitido("Individual")) {
                 comboTipoParticipante.setSelectedItem("Jugador");
             } else if (seleccionada.tipoParticipantePermitido("Equipo")) {
@@ -439,14 +457,13 @@ public class VentanaRegistro extends JFrame implements Observer {
             }
             comboTipoParticipante.setEnabled(false);
         } else {
-            // Caso de Videojuegos, se permite que se elija libremente
+            //caso de Videojuegos,se permite que se elija libremente
             comboTipoParticipante.setEnabled(true);
         }
     }
 
-
     /**
-     * Llena el combo de archivos dependiendo de la categoria seleccionada
+     * llena el combo de archivos dependiendo de la categoria seleccionada.
      */
     private void actualizarComboArchivos() {
         comboArchivo.removeAllItems();
@@ -505,20 +522,23 @@ public class VentanaRegistro extends JFrame implements Observer {
     }
 
     /**
-     * Carga la imagen
+     * carga una imagen desde los recursos internos del proyecto y la escala para
+     * mostrarla en la vista previa del avatar.
+     * * @param categoria la carpeta de la categoria seleccionada.
+     * @param archivo el nombre exacto del archivo de imagen.
      */
     private void cargarImagenInterna(String categoria, String archivo) {
-        // ruta para la imagen seleccionada
+        //ruta para la imagen seleccionada
         String rutaInterna = "imagenes/" + categoria + "/" + archivo;
         java.net.URL urlImg = VentanaRegistro.class.getResource(rutaInterna);
 
-        if (urlImg != null) {
+        if (urlImg!=null) {
             ImageIcon icono = new ImageIcon(urlImg);
             Image imgEscalada = icono.getImage().getScaledInstance(80, 80, Image.SCALE_SMOOTH);
             lblAvatarPreview.setIcon(new ImageIcon(imgEscalada));
             lblAvatarPreview.setText("");
 
-            // Guardamos la ruta para asignarla al Participante
+            //guardamos la ruta para asignarla al participante
             rutaAvatarActual = "src/main/resources/org/gui/" + rutaInterna;
         }
     }
