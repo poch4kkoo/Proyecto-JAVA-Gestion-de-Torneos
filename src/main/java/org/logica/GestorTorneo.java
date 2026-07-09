@@ -30,6 +30,7 @@ public class GestorTorneo {
 
     //Variables de control de estado y de cronograma
     private int rondaActual;
+    private String mensajeEstado; // reemplaza System.out.println para notificar a la GUI
     private int horaInicio = 9;
     private int minutoInicio = 0;
     private int maxCanchas = 3;
@@ -265,7 +266,7 @@ public class GestorTorneo {
 
                 //Se prohíben empates en formatos de eliminación directa o doble.
                 if (formato != FormatoTorneo.LIGA_SIMPLE && e.getGanador() == null) {
-                    System.out.println("No se puede avanzar: Hay un partido empatado que requiere definición.");
+                    this.mensajeEstado = "⚠ Hay un partido empatado que requiere definición antes de continuar.";
                     return false;
                 }
             }
@@ -278,6 +279,13 @@ public class GestorTorneo {
      * de la ronda anterior y estructurando las nuevas llaves.
      */
     public void avanzarRonda() {
+
+        // Separamos la logica segun el formato para evitar que eliminatoria directa
+        // genere una llave de perdedores que no corresponde
+        if (formato == FormatoTorneo.ELIMINATORIA_DIRECTA) {
+            avanzarRondaDirecta();
+            return;
+        }
 
         // Listas locales temporales de recolección para la ronda que acaba de cerrar
         List<Participante> ganadoresWB = new ArrayList<>();
@@ -456,6 +464,85 @@ public class GestorTorneo {
     }
 
     /**
+     * Logica exclusiva para avanzar rondas en Eliminatoria Directa.
+     * Solo avanza los ganadores de la llave "Ganadores", sin crear
+     * ninguna llave de perdedores (los eliminados quedan fuera).
+     */
+    private void avanzarRondaDirecta() {
+        List<Participante> clasificados = new ArrayList<>();
+
+        for (Enfrentamiento e : enfrentamientos) {
+            if (e.getRonda() == this.rondaActual) {
+                Participante ganador = e.getGanador();
+                if (ganador != null && !(ganador instanceof ParticipanteVacio)) {
+                    clasificados.add(ganador);
+                }
+            }
+        }
+
+        // Si queda 1 o menos clasificados el torneo termino
+        if (clasificados.size() <= 1) {
+            notificar();
+            return;
+        }
+
+        this.rondaActual++;
+
+        // Emparejamos a los clasificados en nuevos partidos
+        for (int i = 0; i + 1 < clasificados.size(); i += 2) {
+            enfrentamientos.add(new Enfrentamiento(
+                    clasificados.get(i), clasificados.get(i + 1), this.rondaActual, "Ganadores"
+            ));
+        }
+
+        // Si el numero de clasificados es impar (no deberia pasar si la generacion fue correcta)
+        // el ultimo pasa con Bye
+        if (clasificados.size() % 2 != 0) {
+            registrarEnfrentamientoSeguro(new Enfrentamiento(
+                    clasificados.get(clasificados.size() - 1), new ParticipanteVacio(), this.rondaActual, "Ganadores"
+            ));
+        }
+
+        asignarHorariosAutomaticos();
+        notificar();
+    }
+
+    /**
+     * Calcula el lider de puntos en Liga Simple recorriendo todos los enfrentamientos.
+     * Victoria = 3 puntos, Empate = 1 punto, Derrota = 0 puntos.
+     * @return El Participante con mas puntos, o null si hay empate en el primer puesto.
+     */
+    private Participante calcularLiderLiga() {
+        Participante lider = null;
+        int maxPuntos = -1;
+
+        for (Participante p : Inscritos) {
+            if (p instanceof ParticipanteVacio) continue;
+            int puntos = 0;
+
+            for (Enfrentamiento enf : enfrentamientos) {
+                if (!enf.isJugado()) continue;
+                Participante ganador = enf.getGanador();
+
+                if (ganador == p) {
+                    puntos += 3; // victoria
+                } else if (ganador == null) {
+                    // empate: verificamos que el participante este en ese partido
+                    if (enf.getParticipante1() == p || enf.getParticipante2() == p) {
+                        puntos += 1;
+                    }
+                }
+            }
+
+            if (puntos > maxPuntos) {
+                maxPuntos = puntos;
+                lider = p;
+            }
+        }
+        return lider;
+    }
+
+    /**
      * Analiza el árbol estructural completo del torneo para deducir matemáticamente
      + la etapa exacta que corresponde agendar en fases avanzadas de Eliminatoria Doble.
      * @return Cadena identificadora del estado del torneo ("SemifinalLB", "GranFinal", "RondaNormalLB", "FinalLB").
@@ -576,4 +663,60 @@ public class GestorTorneo {
      * @return Una Lista con todos los objetos de tipo Enfrentamiento.
      */
     public List<Enfrentamiento> getEnfrentamientos() { return enfrentamientos; }
+
+    /**
+     * Determina si el torneo ya tiene un ganador definitivo segun el formato.
+     * - Eliminatoria directa: ganador del unico partido de la ultima ronda.
+     * - Eliminatoria doble:   ganador de la Gran Final.
+     * - Liga simple:          lider en puntos cuando todos los partidos estan jugados.
+     *
+     * @return El Participante ganador, o null si el torneo sigue en curso.
+     */
+    public Participante getGanadorTorneo() {
+        if (enfrentamientos.isEmpty()) return null;
+
+        if (formato == FormatoTorneo.ELIMINATORIA_DIRECTA) {
+            // Buscamos el unico partido de la ultima ronda de la llave Ganadores
+            int ultimaRonda = enfrentamientos.stream()
+                    .filter(e -> e.getLlave().equalsIgnoreCase("Ganadores"))
+                    .mapToInt(Enfrentamiento::getRonda).max().orElse(0);
+            List<Enfrentamiento> finalRonda = new ArrayList<>();
+            for (Enfrentamiento e : enfrentamientos) {
+                if (e.getRonda() == ultimaRonda && e.getLlave().equalsIgnoreCase("Ganadores")) {
+                    finalRonda.add(e);
+                }
+            }
+            if (finalRonda.size() == 1 && finalRonda.get(0).isJugado()) {
+                return finalRonda.get(0).getGanador();
+            }
+        }
+
+        if (formato == FormatoTorneo.ELIMINATORIA_DOBLE) {
+            for (Enfrentamiento e : enfrentamientos) {
+                if (e.getLlave().equalsIgnoreCase("Gran Final") && e.isJugado() && e.getGanador() != null) {
+                    return e.getGanador();
+                }
+            }
+        }
+
+        if (formato == FormatoTorneo.LIGA_SIMPLE) {
+            // Solo anunciamos lider cuando todos los partidos estan jugados
+            for (Enfrentamiento e : enfrentamientos) {
+                if (!e.isJugado()) return null;
+            }
+            return calcularLiderLiga();
+        }
+
+        return null;
+    }
+
+    /**
+     * Retorna el ultimo mensaje de estado importante (ej: empate bloqueante)
+     * y lo limpia para que no se muestre dos veces en la GUI.
+     */
+    public String consumirMensajeEstado() {
+        String msg = this.mensajeEstado;
+        this.mensajeEstado = null;
+        return msg;
+    }
 }

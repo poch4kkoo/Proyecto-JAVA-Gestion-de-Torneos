@@ -116,14 +116,15 @@ public class VentanaGestionInscritos extends JDialog {
                 JOptionPane.showMessageDialog(this, "Ingrese el nombre del miembro.");
                 return;
             }
-            ((Equipo) seleccionado).agregarMiembro(nombreMiembro);
-
-            int antes = ((Equipo) seleccionado).getNombresMiembros().size();
-            if (((Equipo) seleccionado).getNombresMiembros().size() == antes) {
-
-                JOptionPane.showMessageDialog(this, "El miembro \"" + nombreMiembro + "\" ya esta en el equipo");
+            // guardamos el tamaño antes de intentar agregar
+            Equipo equipo = (Equipo) seleccionado;
+            int antes = equipo.getNombresMiembros().size();
+            equipo.agregarMiembro(nombreMiembro);
+            // si el tamaño no cambió, agregarMiembro lo rechazó (duplicado)
+            if (equipo.getNombresMiembros().size() == antes) {
+                JOptionPane.showMessageDialog(this, "El miembro \"" + nombreMiembro + "\" ya está en el equipo.");
+                return;
             }
-
             txtNuevoMiembro.setText("");
             mostrarDetalle();
         });

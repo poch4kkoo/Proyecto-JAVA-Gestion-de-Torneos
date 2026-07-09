@@ -108,6 +108,29 @@ public class PanelTablaTorneo extends JPanel implements org.logica.Observer {
         boolean esEliminatoria = gestor.getFormato() != FormatoTorneo.LIGA_SIMPLE;
         btnSiguienteRonda.setEnabled(esEliminatoria && !gestor.getEnfrentamientos().isEmpty() && gestor.rondaActualTerminada());
 
+        // mostrar dialogo si hay un ganador definitivo
+        Participante ganador = gestor.getGanadorTorneo();
+        if (ganador != null) {
+            btnSiguienteRonda.setEnabled(false);
+            JOptionPane.showMessageDialog(
+                    this,
+                    "🏆 ¡El ganador del torneo es:\n\n" + ganador.getNombre() + "!",
+                    "Torneo Finalizado",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+        }
+
+        // mostrar aviso si hay un empate bloqueante
+        String mensajeEstado = gestor.consumirMensajeEstado();
+        if (mensajeEstado != null) {
+            JOptionPane.showMessageDialog(
+                    this,
+                    mensajeEstado,
+                    "Atención",
+                    JOptionPane.WARNING_MESSAGE
+            );
+        }
+
         panelArbol.revalidate();
         panelArbol.repaint();
     }
