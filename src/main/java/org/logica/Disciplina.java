@@ -1,9 +1,7 @@
 package org.logica;
+
 /**
- * enumeracion que representa las distintas disciplinas deportivas o juegos
- * disponibles en el sistema de torneos. cada constante define sus propias
- * reglas de validacion de puntajes, formatos de impresion y restricciones
- * sobre los tipos y cantidades de participantes permitidos.
+ * Enumeración que define las disciplinas deportivas soportadas por el sistema de gestión de torneos.
  */
 public enum Disciplina {
     FUTBOL {
@@ -84,7 +82,7 @@ public enum Disciplina {
     TENIS {
         @Override
         public boolean esValido(float p1, float p2) {
-            //el tenis se gana por sets (ej: 2-0, 2-1) no empates
+            //el tenis se gana por sets (ej: 2-0, 2-1) no  empates
             return p1>=0 && p2>=0 && p1!=p2 && (p1%1==0) && (p2%1==0);
         }
 
@@ -132,7 +130,7 @@ public enum Disciplina {
     VOLEIBOL {
         @Override
         public boolean esValido(float p1, float p2) {
-            //el voleibol se gana por sets (ej: 3-0, 3-1, 3-2). no empates
+            //el voleibol se gana por sets (ej: 3-0, 3-1, 3-2). no  empates
             return p1>=0 && p2>=0 && p1!=p2 && (p1%1==0) && (p2%1==0);
         }
 
@@ -178,48 +176,47 @@ public enum Disciplina {
         @Override
         public int getMaximoJugadores() { return 1; }
     };
+
     /**
-     * valida si el puntaje ingresado es correcto para la disciplina.
      *
-     * @param p1 puntaje del participante 1.
-     * @param p2 puntaje del participante 2.
-     * @return true si el resultado es valido, false en caso contrario.
+     * @param p1 Puntaje del participante 1.
+     * @param p2 Puntaje del participante 2.
+     * @return True si cummple las reglas de la disciplina, False en el caso contrario.
      */
     public abstract boolean esValido(float p1, float p2);
+
     /**
-     * formatea el puntaje numerico a una cadena de texto legible para el usuario.
-     *
-     * @param p1 puntaje del participante 1.
-     * @param p2 puntaje del participante 2.
-     * @return el resultado formateado(ej:"sets: 3-0").
+     * Genera una cadena de texto estilizada y legible con la nomenclatura del deporte.
+     * @param p1 Puntaje del participante 1.
+     * @param p2 Puntaje del participante 2.
+     * @return Cadena formateada con los puntajes.
      */
     public abstract String formatearPuntaje(float p1, float p2);
 
     /**
-     * determina que tipo de inscripcion o participante se permite inscribir.
-     * mas que nada es para seguir la logica real de los torneos (no tiene sentido
-     * un torneo de futbol con participantes individuales o una partida de ajedrez en equipos).
-     *
-     * @param tipo el tipo de participante ("equipo" o "individual").
-     * @return true si el tipo es permitido en esta disciplina.
+     * Restringe las solicitudes de inscripcion dictaminando si la disciplina acepta
+     * a un participante del tipo "equipo" o "individual".
+     * @param tipo Cadena de texto del Tipo de participante.
+     * @return True si el "tipo" esta autorizado, False si no es compatible.
      */
     public abstract boolean tipoParticipantePermitido(String tipo);
+
     /**
-     * indica si la disciplina solo admite un tipo de participante estricto.
-     *
-     * @return true si la modalidad es fija,false si es mixta o variable (como videojuegos).
+     * Indica si la disciplina posee una categoria fija en cuanto al numero de competidores,
+     * (solo equipos o solo individual).
+     * @return True si la modalidad es fija y False si no lo es.
      */
     public abstract boolean tieneModalidadFija();
+
     /**
-     * obtiene la cantidad minima de jugadores permitidos por equipo.
-     *
-     * @return el numero minimo de integrantes.
+     * Obtiene el tope minimo de jugadores aceptados por equipo.
+     * @return Numero entero con la cantidad minima de jugadores permitidos.
      */
     public abstract int getMinimoJugadores();
+
     /**
-     * obtiene la cantidad maxima de jugadores permitidos por equipo.
-     *
-     * @return el numero maximo de integrantes.
+     * Obtiene el tope maximo de jugadores aceptados por equipo.
+     * @return Numero entero con la cantidad maxima de jugadores permitidos.
      */
     public abstract int getMaximoJugadores();
 }
