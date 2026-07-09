@@ -7,11 +7,11 @@ Pablo Sebastian Bascuñan Espina
 1. Clonar el repositorio.
 2. Abrir el proyecto en un IDE (intelliJ IDEA recomendado).
 3. Configurar el SDK (java 17 o superior).
-4. Ejecutar la clase "Main" ubicada en "src/main/java/org/Main.java".creo que esto hay que cambiarlo
+4. Ejecutar la clase "Main" ubicada en "src/main/java/main/Main.java".
 
 ##Arquitectura y Patrones de Diseño
 
-Este proyecto fue desarrollado asplicando una separacion estricta entre la logica de negocio y la interfaz grafica. Para lograr un codigo escalable y mantenible, se implementaron los siguientes patrones de diseño:
+Este proyecto fue desarrollado asplicando una separacion estricta entre la logica y la interfaz grafica. Para lograr un codigo escalable y mantenible, se implementaron los siguientes patrones de diseño:
 
 1. Factory Method(Creacional):Implementado en la clase "ParticipanteFactory". Se encarga de instanciar objetos concretos ("Jugador" o "Equipo") dependiendo de la seleccion del usuario en la interfaz. Esto oculta la complejidad de cracion y asegura que la vista no dependa directamente de las clases concretas, respetando el principio de responsabilidad unica.
 
