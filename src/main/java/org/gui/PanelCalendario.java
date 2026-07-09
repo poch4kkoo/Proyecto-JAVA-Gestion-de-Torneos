@@ -76,12 +76,12 @@ public class PanelCalendario extends JPanel implements org.logica.Observer {
                 btnEditarFecha.setFont(new Font("Arial", Font.PLAIN, 10));
                 btnEditarFecha.setMargin(new Insets(2, 5, 2, 5));
                 btnEditarFecha.setFocusPainted(false);
-                btnEditarFecha.setToolTipText("Editar fecha de esta jornada");
+                btnEditarFecha.setToolTipText("Editar");
 
                 btnEditarFecha.addActionListener(e -> {
                     String nuevaFecha = JOptionPane.showInputDialog(
                             this,
-                            "Ingrese la nueva fecha para esta jornada:",
+                            "Nombre de la Jornada (semifinal, liga 2026, etc):",
                             fechaActual
                     );
 
@@ -168,13 +168,36 @@ public class PanelCalendario extends JPanel implements org.logica.Observer {
         pnlCentro.add(lblP2);
 
         //Hora del partido
-        JPanel pnlDer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
+        JPanel pnlDer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
         pnlDer.setOpaque(false);
 
         JLabel lblHora = new JLabel(enf.getHora());
         lblHora.setFont(new Font("Arial", Font.BOLD, 12));
         lblHora.setForeground(new Color(39, 174, 96));
+
+        // boton para editar la hora
+        JButton btnEditarHora = new JButton("DD/MM, HRS");
+        btnEditarHora.setFont(new Font("Arial", Font.PLAIN, 10));
+        btnEditarHora.setMargin(new Insets(2, 5, 2, 5));
+        btnEditarHora.setFocusPainted(false);
+        btnEditarHora.setToolTipText("Editar Fecha y hora");
+
+        btnEditarHora.addActionListener(e -> {
+            String nuevaHora = JOptionPane.showInputDialog(
+                    this,
+                    "Ingrese hora y fecha para este partido:",
+                    enf.getHora()
+            );
+
+            // actualizamos la hora
+            if (nuevaHora != null && !nuevaHora.trim().isEmpty()) {
+                enf.setHora(nuevaHora.trim().toUpperCase());
+                actualizar(); // Redibuja el calendario
+            }
+        });
+
         pnlDer.add(lblHora);
+        pnlDer.add(btnEditarHora);
 
         // Ensamblaje
         fila.add(pnlIzq, BorderLayout.WEST);
