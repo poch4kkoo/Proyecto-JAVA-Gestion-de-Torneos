@@ -61,6 +61,7 @@ classDiagram
         +configurarTorneo(nombre: String, disciplina: Disciplina, formato: FormatoTorneo) void
         +inscribirParticipante(participante: Participante) void
         +eliminarParticipante(participante: Participante) void
+        +intercambiarParticipantes(p1: Participante, p2: Participante) void
         +generarTorneo() void
         +rondaActualTerminada() boolean
         +avanzarRonda() void
@@ -117,6 +118,9 @@ classDiagram
         -jugado: boolean
         -puntaje1: float
         -puntaje2: float
+        -llave: String
+        -hora: String
+        -recinto: String
         +Enfrentamiento(p1: Participante, p2: Participante)
         +Enfrentamiento(p1: Participante, p2: Participante, ronda: int)
         +getRonda() int
@@ -128,6 +132,9 @@ classDiagram
         +getPuntaje2() float
         +registrarResultado(puntos1: float, puntos2: float) void
         +getGanador() Participante
+        +getLlave() String
+        +setHora(hora: String) void
+        +setRecinto(recinto: String) void
     }
 
     class Disciplina {
