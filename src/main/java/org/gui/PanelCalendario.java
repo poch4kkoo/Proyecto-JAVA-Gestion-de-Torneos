@@ -7,31 +7,41 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
+/**
+ * panel de la interfaz grafica que muestra el calendario de enfrentamientos.
+ * implementa el patron observer para actualizarse automaticamente cuando
+ * el gestor de torneos genera o modifica los partidos.
+ */
 public class PanelCalendario extends JPanel implements org.logica.Observer {
 
     private JPanel panelContenedor;
-
+    /**
+     * constructor del panel calendario.
+     * configura la interfaz grafica basica y se suscribe a los cambios del torneo.
+     */
     public PanelCalendario() {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
 
-        // Nos suscribimos para escuchar cuando se genere o actualice el torneo
+        //nos suscribimos para escuchar cuando se genere o actualice el torneo
         GestorTorneo.getInstancia().registrarObserver(this);
 
-        // Panel para ver la lista de partidos
+        //panel para ver la lista de partidos
         panelContenedor = new JPanel();
         panelContenedor.setLayout(new BoxLayout(panelContenedor, BoxLayout.Y_AXIS));
         panelContenedor.setBackground(Color.WHITE);
 
-        // Hacemos que tenga scroll por si son muchos dias
+        //hacemos que tenga scroll por si son muchos dias
         JScrollPane scroll = new JScrollPane(panelContenedor);
         scroll.setBorder(BorderFactory.createEmptyBorder());
         scroll.getVerticalScrollBar().setUnitIncrement(16);
 
         add(scroll, BorderLayout.CENTER);
     }
-
+    /**
+     * metodo invocado cuando el gestor de torneo notifica un cambio.
+     * reconstruye toda la lista visual de partidos agrupandolos por fecha.
+     */
     @Override
     public void actualizar() {
         panelContenedor.removeAll();
@@ -43,10 +53,10 @@ public class PanelCalendario extends JPanel implements org.logica.Observer {
             pnlVacio.add(new JLabel("Aún no hay enfrentamientos. Genera la tabla del torneo primero."));
             panelContenedor.add(pnlVacio);
         } else {
-            // Agrupar los partidos segun su fecha
+            //agrupar los partidos segun su fecha
             Map<String, List<Enfrentamiento>> porFecha = new LinkedHashMap<>();
             for (Enfrentamiento enf : partidos) {
-                // Filtramos los pases automáticos
+                //filtramos los pases automaticos
                 if (enf.getParticipante1() instanceof ParticipanteVacio || enf.getParticipante2() instanceof ParticipanteVacio) {
                     continue;
                 }
@@ -55,15 +65,15 @@ public class PanelCalendario extends JPanel implements org.logica.Observer {
 
             int contadorPartido = 1;
 
-            // interfaz gráfica
+            //interfaz gráfica
             for (Map.Entry<String, List<Enfrentamiento>> entrada : porFecha.entrySet()) {
 
                 String fechaActual = entrada.getKey();
                 List<Enfrentamiento> partidosDelDia = entrada.getValue();
 
-                // Barra del Día
+                //barra del dia
                 JPanel headerDia = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
-                headerDia.setBackground(new Color(41, 128, 185)); // Azul
+                headerDia.setBackground(new Color(41, 128, 185)); //azul
                 headerDia.setMaximumSize(new Dimension(Integer.MAX_VALUE, 35));
 
                 JLabel lblDia = new JLabel(fechaActual);
@@ -71,7 +81,7 @@ public class PanelCalendario extends JPanel implements org.logica.Observer {
                 lblDia.setFont(new Font("Arial", Font.BOLD, 13));
                 headerDia.add(lblDia);
 
-                // Boton de edicion fecha
+                //boton de edicion fecha
                 JButton btnEditarFecha = new JButton("Editar");
                 btnEditarFecha.setFont(new Font("Arial", Font.PLAIN, 10));
                 btnEditarFecha.setMargin(new Insets(2, 5, 2, 5));
@@ -90,20 +100,20 @@ public class PanelCalendario extends JPanel implements org.logica.Observer {
                         for (Enfrentamiento enf : partidosDelDia) {
                             enf.setFecha(fechaFormateada);
                         }
-                        actualizar(); // Volvemos a dibujar el calendario
+                        actualizar(); //volvemos a dibujar el calendario
                     }
                 });
 
                 headerDia.add(btnEditarFecha);
                 panelContenedor.add(headerDia);
 
-                // partidos de ese día
+                //partidos de ese día
                 for (Enfrentamiento enf : partidosDelDia) {
                     panelContenedor.add(crearFilaPartido(enf, contadorPartido));
                     contadorPartido++;
                 }
 
-                // Espacio antes del siguiente día
+                //espacio antes del siguiente día
                 panelContenedor.add(Box.createVerticalStrut(15));
             }
         }
@@ -111,7 +121,13 @@ public class PanelCalendario extends JPanel implements org.logica.Observer {
         panelContenedor.revalidate();
         panelContenedor.repaint();
     }
-
+    /**
+     * crea un componente visual (fila) para mostrar los detalles de un partido especifico.
+     *
+     * @param enf el enfrentamiento del cual se extraeran los datos.
+     * @param numero el numero identificador del partido en la lista.
+     * @return un jpanel configurado con la informacion del partido.
+     */
     private JPanel crearFilaPartido(Enfrentamiento enf, int numero) {
         JPanel fila = new JPanel(new BorderLayout(5, 0));
         fila.setBackground(Color.WHITE);
@@ -121,7 +137,7 @@ public class PanelCalendario extends JPanel implements org.logica.Observer {
         ));
         fila.setMaximumSize(new Dimension(Integer.MAX_VALUE, 45));
 
-        // Llaves
+        //llaves
         JPanel pnlIzq = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
         pnlIzq.setOpaque(false);
 
@@ -134,7 +150,7 @@ public class PanelCalendario extends JPanel implements org.logica.Observer {
         String textoLlave = enf.getLlave().toUpperCase();
         FormatoTorneo formato = GestorTorneo.getInstancia().getFormato();
 
-        // Etiqueta para el Formato del torneo
+        //etiqueta para el formato del torneo
         if (formato == FormatoTorneo.LIGA_SIMPLE) {
             textoLlave = "LIGA";
         } else if (formato == FormatoTorneo.ELIMINATORIA_DIRECTA) {
@@ -148,13 +164,13 @@ public class PanelCalendario extends JPanel implements org.logica.Observer {
         pnlIzq.add(lblNum);
         pnlIzq.add(lblInfo);
 
-        // Banderas y Nombres
+        //banderas y nombres
         JPanel pnlCentro = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
         pnlCentro.setOpaque(false);
 
         JLabel lblP1 = new JLabel(enf.getParticipante1().getNombre());
         lblP1.setIcon(obtenerIconoEscalado(enf.getParticipante1().getRutaAvatar(), 20, 20));
-        lblP1.setHorizontalTextPosition(SwingConstants.LEFT); // Nombre a la izquierda de la bandera
+        lblP1.setHorizontalTextPosition(SwingConstants.LEFT); //nombre a la izquierda de la bandera
 
         JLabel lblVs = new JLabel("VS");
         lblVs.setFont(new Font("Arial", Font.BOLD, 10));
@@ -167,7 +183,7 @@ public class PanelCalendario extends JPanel implements org.logica.Observer {
         pnlCentro.add(lblVs);
         pnlCentro.add(lblP2);
 
-        //Hora del partido
+        //hora del partido
         JPanel pnlDer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
         pnlDer.setOpaque(false);
 
@@ -175,7 +191,7 @@ public class PanelCalendario extends JPanel implements org.logica.Observer {
         lblHora.setFont(new Font("Arial", Font.BOLD, 12));
         lblHora.setForeground(new Color(39, 174, 96));
 
-        // boton para editar la hora
+        //boton para editar la hora
         JButton btnEditarHora = new JButton("DD/MM, HRS");
         btnEditarHora.setFont(new Font("Arial", Font.PLAIN, 10));
         btnEditarHora.setMargin(new Insets(2, 5, 2, 5));
@@ -189,7 +205,7 @@ public class PanelCalendario extends JPanel implements org.logica.Observer {
                     enf.getHora()
             );
 
-            // actualizamos la hora
+            //actualizamos la hora
             if (nuevaHora != null && !nuevaHora.trim().isEmpty()) {
                 enf.setHora(nuevaHora.trim().toUpperCase());
                 actualizar(); // Redibuja el calendario
@@ -199,14 +215,21 @@ public class PanelCalendario extends JPanel implements org.logica.Observer {
         pnlDer.add(lblHora);
         pnlDer.add(btnEditarHora);
 
-        // Ensamblaje
+        //ensamblaje
         fila.add(pnlIzq, BorderLayout.WEST);
         fila.add(pnlCentro, BorderLayout.CENTER);
         fila.add(pnlDer, BorderLayout.EAST);
 
         return fila;
     }
-
+    /**
+     * obtiene una imagen redimensionada a partir de una ruta especifica.
+     *
+     * @param ruta la ubicacion del archivo de imagen.
+     * @param width el ancho deseado para la imagen.
+     * @param height el alto deseado para la imagen.
+     * @return un imageicon ajustado a las dimensiones o null si falla la carga.
+     */
     private ImageIcon obtenerIconoEscalado(String ruta, int width, int height) {
         if (ruta == null || ruta.trim().isEmpty()) return null;
         try {
