@@ -7,20 +7,28 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.*;
 import java.util.List;
-
+/**
+ * panel principal encargado de visualizar el estado grafico del torneo.
+ * implementa el patron observer para redibujarse automaticamente cuando el
+ * gestor de torneo emite una notificacion de cambio.
+ */
 public class PanelTablaTorneo extends JPanel implements org.logica.Observer {
 
     private JButton btnGenerar;
     private JButton btnSiguienteRonda;
     private JPanel panelArbol;
-
+    /**
+     * constructor del panel.
+     * inicializa los botones superiores y el contenedor central con scroll,
+     * ademas de suscribirse al gestor de torneo como observador.
+     */
     public PanelTablaTorneo() {
         setLayout(new BorderLayout());
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         GestorTorneo.getInstancia().registrarObserver(this);
 
-        // Barra superior
+        //barra superior
         JPanel barraHerramientas = new JPanel(new FlowLayout(FlowLayout.LEFT));
         btnGenerar = new JButton("Generar Tabla");
         btnSiguienteRonda = new JButton("Siguiente Ronda");
@@ -29,7 +37,7 @@ public class PanelTablaTorneo extends JPanel implements org.logica.Observer {
         barraHerramientas.add(btnSiguienteRonda);
         add(barraHerramientas, BorderLayout.NORTH);
 
-        // Panel central con scroll
+        //panel central con scroll
         panelArbol = new JPanel();
         panelArbol.setLayout(new BoxLayout(panelArbol, BoxLayout.Y_AXIS));
         panelArbol.setBackground(Color.WHITE);
@@ -69,7 +77,11 @@ public class PanelTablaTorneo extends JPanel implements org.logica.Observer {
             GestorTorneo.getInstancia().avanzarRonda();
         });
     }
-
+    /**
+     * metodo disparado por el patron observer.
+     * limpia el contenido actual y decide que tipo de grafica dibujar
+     * dependiendo del formato configurado en el torneo.
+     */
     @Override
     public void actualizar() {
 
@@ -77,7 +89,7 @@ public class PanelTablaTorneo extends JPanel implements org.logica.Observer {
 
         GestorTorneo gestor = GestorTorneo.getInstancia();
 
-        // Dibuja la tabla con los enfrentamientos
+        //dibuja la tabla con los enfrentamientos
         if (!gestor.getEnfrentamientos().isEmpty()) {
 
             if (gestor.getFormato() == FormatoTorneo.LIGA_SIMPLE) {
@@ -89,7 +101,7 @@ public class PanelTablaTorneo extends JPanel implements org.logica.Observer {
             }
 
         } else {
-            // Mensaje por si no se han registrado participantes
+            //mensaje por si no se han registrado participantes
             panelArbol.add(new JLabel("Añade a todos los participantes y apreta (Generar Tabla)"));
         }
 
@@ -101,6 +113,12 @@ public class PanelTablaTorneo extends JPanel implements org.logica.Observer {
     }
 
     //muestra enfrentamientos agrupados por ronda para eliminatorias
+    /**
+     * dibuja los enfrentamientos separados y agrupados por su ronda respectiva.
+     * exclusivo para formatos de eliminacion directa o doble.
+     *
+     * @param gestor instancia actual del gestor de torneo con los datos cargados.
+     */
     private void dibujarEliminatoria(GestorTorneo gestor) {
         Map<Integer, List<Enfrentamiento>> porRonda = new LinkedHashMap<>();
         for (Enfrentamiento e : gestor.getEnfrentamientos()) {
@@ -120,6 +138,12 @@ public class PanelTablaTorneo extends JPanel implements org.logica.Observer {
     }
 
     //tabla de posiciones y lista de partidos para liga simple
+    /**
+     * genera visualmente una tabla de clasificacion tradicional seguida
+     * de la lista completa de partidos a disputar en el torneo.
+     *
+     * @param gestor instancia actual del gestor de torneo.
+     */
     private void dibujarTablaLiga(GestorTorneo gestor) {
         JLabel lblTabla = new JLabel("  Tabla de Posiciones");
         lblTabla.setFont(new Font("Arial", Font.BOLD, 13));
@@ -144,7 +168,7 @@ public class PanelTablaTorneo extends JPanel implements org.logica.Observer {
             Participante p = gestor.getInscritos().get(fila[0]);
             if (p instanceof ParticipanteVacio) continue;
 
-            // Obtenemos el ícono escalado
+            //obtenemos el ícono escalado
             ImageIcon icono = obtenerIconoEscalado(p.getRutaAvatar(), 22, 22);
 
             modeloTabla.addRow(new Object[]{
@@ -159,12 +183,12 @@ public class PanelTablaTorneo extends JPanel implements org.logica.Observer {
         tabla.setFillsViewportHeight(true);
         tabla.setRowHeight(28);
         tabla.getColumnModel().getColumn(0).setMaxWidth(30);
-        tabla.getColumnModel().getColumn(1).setMaxWidth(45); // Columna del Logo
+        tabla.getColumnModel().getColumn(1).setMaxWidth(45); //columna del Logo
 
         JScrollPane scrollTabla = new JScrollPane(tabla);
         scrollTabla.setPreferredSize(new Dimension(500, Math.min(150, (modeloTabla.getRowCount() + 1) * 29)));
 
-        // Ubicacion y tamaño Tabla liga
+        //ubicacion y tamaño tabla liga
         scrollTabla.setMaximumSize(new Dimension(500, 200));
         scrollTabla.setAlignmentX(Component.CENTER_ALIGNMENT);
         panelArbol.add(scrollTabla);
@@ -181,8 +205,14 @@ public class PanelTablaTorneo extends JPanel implements org.logica.Observer {
             panelArbol.add(filaPartido);
         }
     }
-
-    // se calcula Partidos jugados, Ganador, Empates, Perdidos y Puntos por participante
+    /**
+     * calcula y ordena las estadisticas de cada participante (jugados,ganados,etc)
+     * segun los resultados registrados en los enfrentamientos.
+     *
+     * @param gestor instancia del gestor de torneo.
+     * @return una lista de arreglos enteros donde cada arreglo representa la fila de estadisticas de un participante.
+     */
+    //se calcula Partidos jugados, Ganador, Empates, Perdidos y Puntos por participante
     private List<int[]> calcularPosiciones(GestorTorneo gestor) {
         List<Participante> inscritos = gestor.getInscritos();
         int[][] stats = new int[inscritos.size()][6];
@@ -214,7 +244,14 @@ public class PanelTablaTorneo extends JPanel implements org.logica.Observer {
         lista.sort((a, b) -> b[5] != a[5] ? b[5] - a[5] : b[2] - a[2]);
         return lista;
     }
-
+    /**
+     * construye un componente grafico (jpanel) interactivo para un partido especifico.
+     * colorea la fila segun su estado y despliega los botones necesarios para registrar,
+     * editar o desempatar resultados.
+     *
+     * @param enf el objeto enfrentamiento del cual se extraen los datos.
+     * @return un panel configurado y listo para ser agregado a la vista.
+     */
     //fila clickeable para registrar resultado
     //si ya se jugo (verde), esta pendiente (amarillo), si se da un pase automatico (gris)
     private JPanel crearFilaEnfrentamiento(Enfrentamiento enf) {
@@ -228,24 +265,24 @@ public class PanelTablaTorneo extends JPanel implements org.logica.Observer {
         //saber si el partido esta atascado en un empate
         boolean necesitaDesempate = enf.isJugado() && enf.getGanador() == null && esEliminatoria;
 
-        // Panel contenedor de texto e iconos
+        //panel contenedor de texto e iconos
         JPanel panelPartido = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
         panelPartido.setOpaque(false);
 
-        // Participante 1
+        //participante 1
         JLabel lblP1 = new JLabel(enf.getParticipante1().getNombre());
         if (!(enf.getParticipante1() instanceof ParticipanteVacio)) {
             lblP1.setIcon(obtenerIconoEscalado(enf.getParticipante1().getRutaAvatar(), 24, 24));
         }
 
-        // Participante 2
+        //participante 2
         JLabel lblP2 = new JLabel(enf.getParticipante2().getNombre());
         lblP2.setHorizontalTextPosition(SwingConstants.LEFT); // El nombre a la izquierda, el ícono a la derecha
         if (!(enf.getParticipante2() instanceof ParticipanteVacio)) {
             lblP2.setIcon(obtenerIconoEscalado(enf.getParticipante2().getRutaAvatar(), 24, 24));
         }
 
-        //Marcador
+        //marcador
         String textoCentro = " vs ";
         if (enf.isJugado()) {
             textoCentro = " (" + enf.getPuntaje1() + ") - (" + enf.getPuntaje2() + ") ";
@@ -255,16 +292,16 @@ public class PanelTablaTorneo extends JPanel implements org.logica.Observer {
         JLabel lblCentro = new JLabel(textoCentro);
         lblCentro.setFont(new Font("Arial", Font.BOLD, 13));
 
-        // Juntar todo en el panel
+        //juntar todo en el panel
         panelPartido.add(lblP1);
         panelPartido.add(lblCentro);
         panelPartido.add(lblP2);
 
-        // Botones para editar enfrentamientos
+        //botones para editar enfrentamientos
         JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
         panelBotones.setOpaque(false);
 
-        // Botón "Editar": Solo aparece si es eliminatoria, es la Ronda 1 y no se ha jugado aún
+        //boton "Editar" aparece si es eliminatoria, es la Ronda 1 y no se ha jugado aun
         if (esEliminatoria && enf.getRonda() == 1 && !enf.isJugado()) {
             JButton btnEditar = new JButton("Editar");
             btnEditar.setFont(new Font("Arial", Font.PLAIN, 11));
@@ -318,14 +355,22 @@ public class PanelTablaTorneo extends JPanel implements org.logica.Observer {
         return fila;
     }
 
-    // Metodo para cargar imagenes
+    /**
+     * intenta cargar una imagen desde una ruta local y la redimensiona para
+     * ser utilizada como un icono decorativo en la interfaz.
+     *
+     * @param ruta ubicacion del archivo de imagen.
+     * @param width anchura deseada para la imagen.
+     * @param height altura deseada para la imagen.
+     * @return un objeto imageicon formateado, o null si la ruta es invalida o falla la carga.
+     */
     private ImageIcon obtenerIconoEscalado(String ruta, int width, int height) {
         if (ruta == null || ruta.trim().isEmpty()) {
             return null;
         }
         try {
             ImageIcon iconoOriginal = new ImageIcon(ruta);
-            // Validar que la imagen realmente existe
+            //validar que la imagen realmente existe
             if (iconoOriginal.getIconWidth() == -1) {
                 return null;
             }

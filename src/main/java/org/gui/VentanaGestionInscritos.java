@@ -6,7 +6,11 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.util.List;
 
-
+/**
+ * ventana de dialogo que permite gestionar los participantes ya inscritos en el torneo.
+ * permite editar datos de contacto, modificar miembros de equipos y cancelar inscripciones
+ * antes de que el torneo comience.
+ */
 public class VentanaGestionInscritos extends JDialog {
 
     private DefaultListModel<Participante> modeloInscritos;
@@ -22,7 +26,13 @@ public class VentanaGestionInscritos extends JDialog {
     private JTextField txtNuevoMiembro;
     private JButton btnAgregarMiembro;
     private JButton btnQuitarMiembro;
-
+    /**
+     * constructor de la ventana de gestion.
+     * inicializa la interfaz grafica, configura los paneles laterales y asocia los eventos
+     * a los botones de accion.
+     *
+     * @param owner el frame padre sobre el cual se mostrara esta ventana de forma modal.
+     */
     public VentanaGestionInscritos(Frame owner) {
         super(owner, "Gestionar Inscritos", true);
         setSize(550, 400);
@@ -151,7 +161,10 @@ public class VentanaGestionInscritos extends JDialog {
 
         cargarInscritos();
     }
-
+    /**
+     *consulta la lista actual de inscritos en el gestor de torneo
+     *y actualiza el modelo visual de la lista.
+     */
     private void cargarInscritos() {
         modeloInscritos.clear();
         List<Participante> inscritos = GestorTorneo.getInstancia().getInscritos();
@@ -159,7 +172,10 @@ public class VentanaGestionInscritos extends JDialog {
             modeloInscritos.addElement(p);
         }
     }
-
+    /**
+     * muestra la informacion detallada del participante seleccionado en la lista.
+     * si el participante es de tipo equipo,hace visible el panel para gestionar sus miembros.
+     */
     private void mostrarDetalle() {
         Participante seleccionado = listaInscritos.getSelectedValue();
         if (seleccionado == null) {
@@ -179,7 +195,10 @@ public class VentanaGestionInscritos extends JDialog {
             panelMiembros.setVisible(false);
         }
     }
-
+    /**
+     * vacia los campos de texto y oculta las secciones especificas de equipos
+     * cuando no hay ningun participante seleccionado.
+     */
     private void limpiarDetalle() {
         txtContacto.setText("");
         modeloMiembros.clear();
